@@ -8,297 +8,336 @@
         body {
             margin: 0;
             padding: 0;
-            font-family: Arial, sans-serif;
-            background-color: #f5f5f5;
-            color: #333;
+            font-family: 'JetBrains Mono', monospace;
+            transition: margin-top 0.3s ease;
+            background-color: #121212;
+            color: #ffffff;
         }
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-        .auth-form {
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            margin-bottom: 20px;
-        }
-        .auth-form h2 {
-            margin-top: 0;
-            color: #4285f4;
-        }
-        .form-group {
-            margin-bottom: 15px;
-        }
-        .form-group label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-        }
-        .form-group input {
+        
+        .nav-container {
+            background: #1E1E1E;
+            height: 25px;
             width: 100%;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            box-sizing: border-box;
+            position: fixed;
+            top: 0;
+            z-index: 100;
+            transition: height 0.3s ease;
+            overflow: hidden;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            display: flex;
+            justify-content: flex-start;
+            cursor: pointer;
         }
-        button {
-            background-color: #4285f4;
+        
+        .nav-container.expanded {
+            height: 65px;
+        }
+        
+        .nav-content {
+            display: flex;
+            gap: 1.5rem;
+            padding: 1rem;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            align-items: center;
+            width: 100%;
+        }
+        
+        .nav-container.expanded .nav-content {
+            opacity: 1;
+        }
+        
+        .nav-link {
+            color: #ffffff;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 1.1rem;
+            padding: 0.6rem 1.2rem;
+            transition: 0.2s;
+            border-radius: 4px;
+            white-space: nowrap;
+        }
+        
+        .nav-link:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .content-wrapper {
+            margin-top: 25px;
+            height: calc(100vh - 25px);
+            transition: margin-top 0.3s ease;
+        }
+        
+        .nav-container.expanded ~ .content-wrapper {
+            margin-top: 65px;
+            height: calc(100vh - 65px);
+        }
+        
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        
+        .menu-hint {
+            color: #ffffff;
+            padding: 0.3rem 1rem;
+            font-size: 0.9rem;
+            opacity: 0.7;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            align-self: center;
+        }
+        
+        .nav-container.expanded .menu-hint {
+            opacity: 0;
+        }
+        
+        .auth-links {
+            display: flex;
+            gap: 1.5rem;
+            margin-left: auto;
+            align-items: center;
+        }
+        
+        .auth-btn {
+            background: #4285f4;
             color: white;
             border: none;
-            padding: 10px 15px;
+            padding: 0.6rem 1.2rem;
             border-radius: 4px;
             cursor: pointer;
-            font-size: 16px;
+            transition: 0.2s;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1rem;
         }
-        button:hover {
-            background-color: #357abd;
+        
+        .auth-btn:hover {
+            background: #357abd;
         }
-        .error {
-            color: #d32f2f;
-            margin-top: 5px;
-            font-size: 14px;
-        }
-        .success {
-            color: #388e3c;
-            margin-top: 5px;
-            font-size: 14px;
-        }
-        .user-info {
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            margin-bottom: 20px;
-        }
-        .app-content {
+        
+        /* Модальные окна */
+        .modal {
             display: none;
-            background: white;
-            padding: 20px;
+            position: fixed;
+            z-index: 101;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.7);
+        }
+        
+        .modal-content {
+            background-color: #1E1E1E;
+            margin: 10% auto;
+            padding: 2rem;
             border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            width: 350px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
         }
-        .tabs {
-            display: flex;
-            margin-bottom: 20px;
-        }
-        .tab {
-            padding: 10px 20px;
-            cursor: pointer;
-            border-bottom: 2px solid transparent;
-        }
-        .tab.active {
-            border-bottom: 2px solid #4285f4;
+        
+        .close-btn {
+            color: #aaa;
+            float: right;
+            font-size: 1.5rem;
             font-weight: bold;
+            cursor: pointer;
         }
-        .tab-content {
-            display: none;
+        
+        .close-btn:hover {
+            color: #fff;
         }
-        .tab-content.active {
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-group label {
             display: block;
+            margin-bottom: 0.5rem;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 0.8rem;
+            border-radius: 4px;
+            border: 1px solid #333;
+            background-color: #252525;
+            color: #fff;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        
+        .form-actions {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 2rem;
+        }
+        
+        .error-message {
+            color: #ff4444;
+            margin-top: 0.5rem;
+            font-size: 0.9rem;
+        }
+        
+        .success-message {
+            color: #00C851;
+            margin-top: 0.5rem;
+            font-size: 0.9rem;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .user-email {
+            color: #4285f4;
+            font-weight: bold;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div id="authSection">
-            <div class="auth-form" id="loginForm">
-                <h2>Вход</h2>
+    <nav class="nav-container" id="navContainer">
+        <div class="menu-hint">Меню</div>
+        <div class="nav-content">
+            <div>
+                <a class="nav-link" onclick="loadPage('calculator')">Калькулятор</a>
+                <a class="nav-link" onclick="loadPage('charts')">Графики</a>
+                <a class="nav-link" onclick="loadPage('alerts')">Алерты</a>
+            </div>
+            <div class="auth-links" id="authLinks">
+                <button class="auth-btn" onclick="showModal('loginModal')">Вход</button>
+                <button class="auth-btn" onclick="showModal('registerModal')">Регистрация</button>
+            </div>
+            <div class="user-info" id="userInfo" style="display: none;">
+                <span class="user-email" id="userEmail"></span>
+                <button class="auth-btn" onclick="logout()">Выход</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="content-wrapper">
+        <iframe id="contentFrame" src="calculator.html"></iframe>
+    </div>
+
+    <!-- Модальное окно входа -->
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="hideModal('loginModal')">&times;</span>
+            <h2>Вход</h2>
+            <form id="loginForm">
                 <div class="form-group">
                     <label for="loginEmail">Email</label>
-                    <input type="email" id="loginEmail" placeholder="Введите ваш email">
+                    <input type="email" id="loginEmail" required>
                 </div>
                 <div class="form-group">
                     <label for="loginPassword">Пароль</label>
-                    <input type="password" id="loginPassword" placeholder="Введите пароль">
+                    <input type="password" id="loginPassword" required>
                 </div>
-                <div id="loginError" class="error"></div>
-                <div id="loginSuccess" class="success"></div>
-                <button onclick="login()">Войти</button>
-                <p>Нет аккаунта? <a href="#" onclick="showRegisterForm()">Зарегистрируйтесь</a></p>
-            </div>
+                <div class="error-message" id="loginError"></div>
+                <div class="form-actions">
+                    <button type="button" class="auth-btn" onclick="login()">Войти</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
-            <div class="auth-form" id="registerForm" style="display: none;">
-                <h2>Регистрация</h2>
+    <!-- Модальное окно регистрации -->
+    <div id="registerModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="hideModal('registerModal')">&times;</span>
+            <h2>Регистрация</h2>
+            <form id="registerForm">
+                <div class="form-group">
+                    <label for="registerUsername">Имя пользователя</label>
+                    <input type="text" id="registerUsername" required>
+                </div>
                 <div class="form-group">
                     <label for="registerEmail">Email</label>
-                    <input type="email" id="registerEmail" placeholder="Введите ваш email">
+                    <input type="email" id="registerEmail" required>
                 </div>
                 <div class="form-group">
                     <label for="registerPassword">Пароль</label>
-                    <input type="password" id="registerPassword" placeholder="Придумайте пароль (мин. 6 символов)">
+                    <input type="password" id="registerPassword" required>
                 </div>
                 <div class="form-group">
-                    <label for="confirmPassword">Подтвердите пароль</label>
-                    <input type="password" id="confirmPassword" placeholder="Повторите пароль">
+                    <label for="registerConfirmPassword">Подтвердите пароль</label>
+                    <input type="password" id="registerConfirmPassword" required>
                 </div>
-                <div id="registerError" class="error"></div>
-                <div id="registerSuccess" class="success"></div>
-                <button onclick="register()">Зарегистрироваться</button>
-                <p>Уже есть аккаунт? <a href="#" onclick="showLoginForm()">Войдите</a></p>
-            </div>
-        </div>
-
-        <div id="appSection" style="display: none;">
-            <div class="user-info">
-                <h2>Добро пожаловать, <span id="userEmail"></span>!</h2>
-                <button onclick="logout()">Выйти</button>
-            </div>
-
-            <div class="app-content">
-                <div class="tabs">
-                    <div class="tab active" onclick="showTab('calculator')">Калькулятор</div>
-                    <div class="tab" onclick="showTab('charts')">Графики</div>
-                    <div class="tab" onclick="showTab('alerts')">Алерты</div>
+                <div class="error-message" id="registerError"></div>
+                <div class="success-message" id="registerSuccess"></div>
+                <div class="form-actions">
+                    <button type="button" class="auth-btn" onclick="register()">Зарегистрироваться</button>
                 </div>
-
-                <div id="calculator" class="tab-content active">
-                    <h3>Калькулятор криптовалют</h3>
-                    <div class="form-group">
-                        <label>Сумма</label>
-                        <input type="number" id="calcAmount" placeholder="Введите сумму">
-                    </div>
-                    <div class="form-group">
-                        <label>Из валюты</label>
-                        <select id="calcFrom">
-                            <option value="BTC">Bitcoin (BTC)</option>
-                            <option value="ETH">Ethereum (ETH)</option>
-                            <option value="USD">Доллары (USD)</option>
-                            <option value="RUB">Рубли (RUB)</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>В валюту</label>
-                        <select id="calcTo">
-                            <option value="BTC">Bitcoin (BTC)</option>
-                            <option value="ETH">Ethereum (ETH)</option>
-                            <option value="USD">Доллары (USD)</option>
-                            <option value="RUB">Рубли (RUB)</option>
-                        </select>
-                    </div>
-                    <button onclick="calculate()">Рассчитать</button>
-                    <div id="calcResult" style="margin-top: 20px; font-size: 18px;"></div>
-                </div>
-
-                <div id="charts" class="tab-content">
-                    <h3>Графики курсов</h3>
-                    <select id="chartCrypto" onchange="updateChart()">
-                        <option value="BTC">Bitcoin (BTC)</option>
-                        <option value="ETH">Ethereum (ETH)</option>
-                    </select>
-                    <div id="chartContainer" style="height: 300px; margin-top: 20px; background: #f9f9f9; display: flex; align-items: center; justify-content: center;">
-                        <p>Здесь будет график</p>
-                    </div>
-                </div>
-
-                <div id="alerts" class="tab-content">
-                    <h3>Управление алертами</h3>
-                    <div class="form-group">
-                        <label>Криптовалюта</label>
-                        <select id="alertCrypto">
-                            <option value="BTC">Bitcoin (BTC)</option>
-                            <option value="ETH">Ethereum (ETH)</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Условие</label>
-                        <select id="alertCondition">
-                            <option value="above">Выше чем</option>
-                            <option value="below">Ниже чем</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Цена</label>
-                        <input type="number" id="alertPrice" placeholder="Укажите цену">
-                    </div>
-                    <button onclick="addAlert()">Добавить алерт</button>
-                    
-                    <div id="alertsList" style="margin-top: 20px;">
-                        <h4>Ваши алерты</h4>
-                        <div id="noAlerts" style="color: #777;">У вас пока нет алертов</div>
-                    </div>
-                </div>
-            </div>
+            </form>
         </div>
     </div>
 
     <script>
-        // Имитация базы данных в localStorage
-        const DB_NAME = 'cryptoAppDB';
-        const AUTH_KEY = 'cryptoAppAuth';
+        // Состояние приложения
+        const state = {
+            currentUser: null,
+            settings: {}
+        };
+
+        // DOM элементы
+        const navContainer = document.getElementById('navContainer');
+        const authLinks = document.getElementById('authLinks');
+        const userInfo = document.getElementById('userInfo');
+        const userEmail = document.getElementById('userEmail');
         
-        // Инициализация базы данных при первом запуске
-        function initDB() {
-            if (!localStorage.getItem(DB_NAME)) {
-                const db = {
-                    users: [
-                        {
-                            id: 1,
-                            email: 'test@example.com',
-                            password: '$2a$10$xJwL5v6zQUV2D2Z6Q7nzXeYiV7z4e4U4J4e4U4J4e4U4J4e4U4J4e4U' // test123
-                        }
-                    ],
-                    settings: {
-                        1: {
-                            theme: 'light',
-                            lastTab: 'calculator',
-                            alerts: []
-                        }
-                    }
-                };
-                localStorage.setItem(DB_NAME, JSON.stringify(db));
+        // Инициализация при загрузке
+        document.addEventListener('DOMContentLoaded', () => {
+            // Проверяем авторизацию в localStorage
+            const savedUser = localStorage.getItem('cryptoAppUser');
+            const savedSettings = localStorage.getItem('cryptoAppSettings');
+            
+            if (savedUser) {
+                state.currentUser = JSON.parse(savedUser);
+                if (savedSettings) {
+                    state.settings = JSON.parse(savedSettings);
+                }
+                updateUI();
             }
-            return JSON.parse(localStorage.getItem(DB_NAME));
+        });
+
+        // Функции для работы с модальными окнами
+        function showModal(id) {
+            document.getElementById(id).style.display = 'block';
+            // Очищаем сообщения при открытии
+            if (id === 'registerModal') {
+                document.getElementById('registerError').textContent = '';
+                document.getElementById('registerSuccess').textContent = '';
+                document.getElementById('registerForm').reset();
+            } else if (id === 'loginModal') {
+                document.getElementById('loginError').textContent = '';
+                document.getElementById('loginForm').reset();
+            }
         }
         
-        // Получение текущей базы данных
-        function getDB() {
-            return JSON.parse(localStorage.getItem(DB_NAME));
+        function hideModal(id) {
+            document.getElementById(id).style.display = 'none';
         }
-        
-        // Обновление базы данных
-        function updateDB(db) {
-            localStorage.setItem(DB_NAME, JSON.stringify(db));
+
+        // Хеширование пароля (упрощенное для демонстрации)
+        function hashPassword(password) {
+            return btoa(unescape(encodeURIComponent(password))); // В реальном приложении используйте более надежное хеширование
         }
-        
-        // Проверка авторизации
-        function checkAuth() {
-            return JSON.parse(localStorage.getItem(AUTH_KEY));
-        }
-        
-        // Показать форму регистрации
-        function showRegisterForm() {
-            document.getElementById('loginForm').style.display = 'none';
-            document.getElementById('registerForm').style.display = 'block';
-            document.getElementById('registerError').textContent = '';
-            document.getElementById('registerSuccess').textContent = '';
-        }
-        
-        // Показать форму входа
-        function showLoginForm() {
-            document.getElementById('registerForm').style.display = 'none';
-            document.getElementById('loginForm').style.display = 'block';
-            document.getElementById('loginError').textContent = '';
-            document.getElementById('loginSuccess').textContent = '';
-        }
-        
+
         // Регистрация нового пользователя
         function register() {
+            const username = document.getElementById('registerUsername').value.trim();
             const email = document.getElementById('registerEmail').value.trim();
             const password = document.getElementById('registerPassword').value;
-            const confirmPassword = document.getElementById('confirmPassword').value;
+            const confirmPassword = document.getElementById('registerConfirmPassword').value;
             const errorElement = document.getElementById('registerError');
             const successElement = document.getElementById('registerSuccess');
             
             // Валидация
-            if (!email || !password || !confirmPassword) {
+            if (!username || !email || !password || !confirmPassword) {
                 errorElement.textContent = 'Все поля обязательны для заполнения';
-                return;
-            }
-            
-            if (password.length < 6) {
-                errorElement.textContent = 'Пароль должен содержать минимум 6 символов';
                 return;
             }
             
@@ -307,289 +346,132 @@
                 return;
             }
             
-            // Проверка email
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            if (!emailRegex.test(email)) {
+            if (password.length < 6) {
+                errorElement.textContent = 'Пароль должен содержать минимум 6 символов';
+                return;
+            }
+            
+            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
                 errorElement.textContent = 'Введите корректный email';
                 return;
             }
             
-            const db = getDB();
-            
-            // Проверка существующего пользователя
-            if (db.users.some(user => user.email === email)) {
+            // Проверяем, есть ли уже такой пользователь
+            const users = JSON.parse(localStorage.getItem('cryptoAppUsers')) || {};
+            if (users[email]) {
                 errorElement.textContent = 'Пользователь с таким email уже существует';
                 return;
             }
             
-            // Хеширование пароля (упрощенная имитация)
-            const hashedPassword = `hashed_${password}_${Date.now()}`;
-            
-            // Создание нового пользователя
-            const newUser = {
-                id: Date.now(),
-                email,
-                password: hashedPassword
+            // Регистрируем пользователя
+            users[email] = { 
+                username,
+                email, 
+                password: hashPassword(password), // В реальном приложении используйте более надежное хеширование
+                createdAt: new Date().toISOString()
             };
+            localStorage.setItem('cryptoAppUsers', JSON.stringify(users));
             
-            db.users.push(newUser);
-            
-            // Создание настроек по умолчанию
-            db.settings[newUser.id] = {
-                theme: 'light',
-                lastTab: 'calculator',
-                alerts: []
-            };
-            
-            updateDB(db);
-            
-            // Очистка формы
-            document.getElementById('registerEmail').value = '';
-            document.getElementById('registerPassword').value = '';
-            document.getElementById('confirmPassword').value = '';
-            
-            // Сообщение об успехе
+            // Показываем сообщение об успехе
             errorElement.textContent = '';
-            successElement.textContent = 'Регистрация прошла успешно! Теперь вы можете войти.';
+            successElement.textContent = 'Регистрация прошла успешно!';
             
-            // Показываем форму входа
+            // Автоматически входим через 1.5 секунды
             setTimeout(() => {
-                showLoginForm();
-                document.getElementById('loginEmail').value = email;
-                successElement.textContent = '';
-            }, 2000);
+                state.currentUser = { username, email };
+                localStorage.setItem('cryptoAppUser', JSON.stringify(state.currentUser));
+                
+                // Создаем настройки по умолчанию
+                state.settings = {
+                    theme: 'dark',
+                    lastPage: 'calculator',
+                    alerts: []
+                };
+                localStorage.setItem('cryptoAppSettings', JSON.stringify(state.settings));
+                
+                updateUI();
+                hideModal('registerModal');
+                loadPage(state.settings.lastPage);
+            }, 1500);
         }
-        
+
         // Вход пользователя
         function login() {
             const email = document.getElementById('loginEmail').value.trim();
             const password = document.getElementById('loginPassword').value;
             const errorElement = document.getElementById('loginError');
-            const successElement = document.getElementById('loginSuccess');
             
-            // Валидация
-            if (!email || !password) {
-                errorElement.textContent = 'Все поля обязательны для заполнения';
+            // Проверяем пользователя
+            const users = JSON.parse(localStorage.getItem('cryptoAppUsers')) || {};
+            const user = users[email];
+            
+            if (!user || user.password !== hashPassword(password)) {
+                errorElement.textContent = 'Неверный email или пароль';
                 return;
             }
             
-            const db = getDB();
-            const user = db.users.find(user => user.email === email);
+            // Входим
+            state.currentUser = { username: user.username, email };
+            localStorage.setItem('cryptoAppUser', JSON.stringify(state.currentUser));
             
-            // Проверка пользователя
-            if (!user) {
-                errorElement.textContent = 'Пользователь с таким email не найден';
-                return;
-            }
+            // Загружаем настройки
+            const allSettings = JSON.parse(localStorage.getItem('cryptoAppAllSettings')) || {};
+            state.settings = allSettings[email] || {
+                theme: 'dark',
+                lastPage: 'calculator',
+                alerts: []
+            };
             
-            // Упрощенная проверка пароля (в реальном приложении используйте bcrypt)
-            if (!user.password.includes(password)) {
-                errorElement.textContent = 'Неверный пароль';
-                return;
-            }
-            
-            // Сохранение данных авторизации
-            localStorage.setItem(AUTH_KEY, JSON.stringify({
-                userId: user.id,
-                email: user.email
-            }));
-            
-            // Обновление интерфейса
-            showApp(user);
+            updateUI();
+            hideModal('loginModal');
+            loadPage(state.settings.lastPage);
         }
-        
+
         // Выход пользователя
         function logout() {
-            localStorage.removeItem(AUTH_KEY);
-            document.getElementById('appSection').style.display = 'none';
-            document.getElementById('authSection').style.display = 'block';
-            showLoginForm();
+            state.currentUser = null;
+            localStorage.removeItem('cryptoAppUser');
+            updateUI();
+            loadPage('calculator');
         }
-        
-        // Показать основное приложение
-        function showApp(user) {
-            document.getElementById('authSection').style.display = 'none';
-            document.getElementById('appSection').style.display = 'block';
-            document.getElementById('userEmail').textContent = user.email;
-            
-            // Загрузка настроек пользователя
-            const db = getDB();
-            const settings = db.settings[user.id];
-            
-            // Установка последней вкладки
-            showTab(settings.lastTab || 'calculator');
-        }
-        
-        // Показать вкладку
-        function showTab(tabId) {
-            // Скрыть все вкладки
-            document.querySelectorAll('.tab-content').forEach(tab => {
-                tab.classList.remove('active');
-            });
-            
-            // Скрыть все заголовки вкладок
-            document.querySelectorAll('.tab').forEach(tab => {
-                tab.classList.remove('active');
-            });
-            
-            // Показать выбранную вкладку
-            document.getElementById(tabId).classList.add('active');
-            
-            // Активировать заголовок вкладки
-            document.querySelector(`.tab[onclick="showTab('${tabId}')"]`).classList.add('active');
-            
-            // Сохранить выбор в настройках
-            const auth = checkAuth();
-            if (auth) {
-                const db = getDB();
-                if (db.settings[auth.userId]) {
-                    db.settings[auth.userId].lastTab = tabId;
-                    updateDB(db);
-                }
+
+        // Обновление интерфейса
+        function updateUI() {
+            if (state.currentUser) {
+                authLinks.style.display = 'none';
+                userInfo.style.display = 'flex';
+                userEmail.textContent = state.currentUser.username || state.currentUser.email;
+                
+                // Применяем настройки
+                document.body.style.backgroundColor = state.settings.theme === 'dark' ? '#121212' : '#f5f5f5';
+                document.body.style.color = state.settings.theme === 'dark' ? '#ffffff' : '#000000';
+            } else {
+                authLinks.style.display = 'flex';
+                userInfo.style.display = 'none';
             }
         }
-        
-        // Расчет конвертации
-        function calculate() {
-            const amount = parseFloat(document.getElementById('calcAmount').value);
-            const from = document.getElementById('calcFrom').value;
-            const to = document.getElementById('calcTo').value;
+
+        // Загрузка страницы
+        function loadPage(page) {
+            const frame = document.getElementById('contentFrame');
+            frame.src = `${page}.html`;
+            navContainer.classList.remove('expanded');
             
-            if (isNaN(amount) {
-                alert('Введите корректную сумму');
-                return;
+            // Сохраняем последнюю страницу в настройках
+            if (state.currentUser) {
+                state.settings.lastPage = page;
+                const allSettings = JSON.parse(localStorage.getItem('cryptoAppAllSettings')) || {};
+                allSettings[state.currentUser.email] = state.settings;
+                localStorage.setItem('cryptoAppAllSettings', JSON.stringify(allSettings));
             }
-            
-            // Упрощенные курсы (в реальном приложении получайте актуальные курсы)
-            const rates = {
-                BTC: { USD: 50000, RUB: 4000000, ETH: 15 },
-                ETH: { USD: 3000, RUB: 240000, BTC: 0.066 },
-                USD: { BTC: 0.00002, ETH: 0.00033, RUB: 80 },
-                RUB: { BTC: 0.00000025, ETH: 0.0000042, USD: 0.0125 }
-            };
-            
-            if (from === to) {
-                document.getElementById('calcResult').textContent = `${amount} ${from} = ${amount} ${to}`;
-                return;
+        }
+
+        // Открытие/закрытие меню по клику
+        navContainer.addEventListener('click', function(e) {
+            if (e.target === navContainer) {
+                navContainer.classList.toggle('expanded');
             }
-            
-            const rate = rates[from][to];
-            const result = amount * rate;
-            
-            document.getElementById('calcResult').textContent = `${amount} ${from} = ${result.toFixed(6)} ${to}`;
-        }
-        
-        // Обновление графика
-        function updateChart() {
-            const crypto = document.getElementById('chartCrypto').value;
-            document.getElementById('chartContainer').innerHTML = `
-                <p>График ${crypto} к USD за последние 30 дней</p>
-                <p>(В реальном приложении здесь будет реальный график)</p>
-            `;
-        }
-        
-        // Добавление алерта
-        function addAlert() {
-            const crypto = document.getElementById('alertCrypto').value;
-            const condition = document.getElementById('alertCondition').value;
-            const price = parseFloat(document.getElementById('alertPrice').value);
-            
-            if (isNaN(price)) {
-                alert('Введите корректную цену');
-                return;
-            }
-            
-            const auth = checkAuth();
-            if (!auth) {
-                alert('Ошибка авторизации');
-                return;
-            }
-            
-            const db = getDB();
-            const alert = {
-                id: Date.now(),
-                crypto,
-                condition,
-                price,
-                createdAt: new Date().toISOString()
-            };
-            
-            db.settings[auth.userId].alerts.push(alert);
-            updateDB(db);
-            
-            // Обновление списка алертов
-            renderAlerts(auth.userId);
-            
-            // Очистка формы
-            document.getElementById('alertPrice').value = '';
-        }
-        
-        // Отображение алертов
-        function renderAlerts(userId) {
-            const db = getDB();
-            const alerts = db.settings[userId].alerts;
-            const alertsList = document.getElementById('alertsList');
-            const noAlerts = document.getElementById('noAlerts');
-            
-            if (alerts.length === 0) {
-                noAlerts.style.display = 'block';
-                alertsList.innerHTML = '<h4>Ваши алерты</h4>';
-                alertsList.appendChild(noAlerts);
-                return;
-            }
-            
-            noAlerts.style.display = 'none';
-            
-            let html = '<h4>Ваши алерты</h4><ul>';
-            
-            alerts.forEach(alert => {
-                const conditionText = alert.condition === 'above' ? 'выше' : 'ниже';
-                html += `
-                    <li style="margin-bottom: 10px; padding: 10px; background: #f9f9f9; border-radius: 4px;">
-                        ${alert.crypto} ${conditionText} ${alert.price} USD
-                        <button onclick="removeAlert(${alert.id})" style="margin-left: 10px; background: #d32f2f; font-size: 12px;">Удалить</button>
-                    </li>
-                `;
-            });
-            
-            html += '</ul>';
-            alertsList.innerHTML = html;
-        }
-        
-        // Удаление алерта
-        function removeAlert(alertId) {
-            const auth = checkAuth();
-            if (!auth) return;
-            
-            const db = getDB();
-            db.settings[auth.userId].alerts = db.settings[auth.userId].alerts.filter(
-                alert => alert.id !== alertId
-            );
-            
-            updateDB(db);
-            renderAlerts(auth.userId);
-        }
-        
-        // Инициализация приложения
-        function initApp() {
-            initDB();
-            
-            const auth = checkAuth();
-            if (auth) {
-                const db = getDB();
-                const user = db.users.find(user => user.id === auth.userId);
-                if (user) {
-                    showApp(user);
-                    renderAlerts(auth.userId);
-                    return;
-                }
-            }
-            
-            showLoginForm();
-        }
-        
-        // Запуск приложения
-        window.onload = initApp;
+        });
     </script>
 </body>
 </html>
