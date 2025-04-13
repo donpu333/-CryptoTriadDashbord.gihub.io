@@ -126,20 +126,24 @@
             width: 100%;
             height: 100%;
             background-color: rgba(0,0,0,0.7);
+            overflow: auto;
         }
         
         .modal-content {
             background-color: #1E1E1E;
-            margin: 10% auto;
-            padding: 2rem;
+            margin: 100px auto;
+            padding: 25px;
             border-radius: 8px;
             width: 350px;
             box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            position: relative;
         }
         
         .close-btn {
             color: #aaa;
-            float: right;
+            position: absolute;
+            right: 20px;
+            top: 15px;
             font-size: 1.5rem;
             font-weight: bold;
             cursor: pointer;
@@ -150,40 +154,42 @@
         }
         
         .form-group {
-            margin-bottom: 1.5rem;
+            margin-bottom: 1.2rem;
         }
         
         .form-group label {
             display: block;
             margin-bottom: 0.5rem;
+            font-size: 0.9rem;
         }
         
         .form-group input {
             width: 100%;
-            padding: 0.8rem;
+            padding: 0.7rem;
             border-radius: 4px;
             border: 1px solid #333;
             background-color: #252525;
             color: #fff;
             font-family: 'JetBrains Mono', monospace;
+            font-size: 0.95rem;
         }
         
         .form-actions {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 2rem;
+            margin-top: 1.5rem;
         }
         
         .error-message {
             color: #ff4444;
             margin-top: 0.5rem;
             font-size: 0.9rem;
+            min-height: 20px;
         }
         
         .success-message {
             color: #00C851;
             margin-top: 0.5rem;
             font-size: 0.9rem;
+            min-height: 20px;
         }
         
         .user-info {
@@ -195,6 +201,27 @@
         .user-email {
             color: #4285f4;
             font-weight: bold;
+        }
+        
+        /* Анимация модального окна */
+        @keyframes modalFadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .modal-content {
+            animation: modalFadeIn 0.3s ease-out;
+        }
+        
+        /* Чекбокс "Запомнить меня" */
+        .remember-me {
+            display: flex;
+            align-items: center;
+            margin: 1rem 0;
+        }
+        
+        .remember-me input {
+            margin-right: 0.5rem;
         }
     </style>
 </head>
@@ -230,15 +257,22 @@
             <form id="loginForm">
                 <div class="form-group">
                     <label for="loginEmail">Email</label>
-                    <input type="email" id="loginEmail" required>
+                    <input type="email" id="loginEmail" required placeholder="Ваш email">
                 </div>
                 <div class="form-group">
                     <label for="loginPassword">Пароль</label>
-                    <input type="password" id="loginPassword" required>
+                    <input type="password" id="loginPassword" required placeholder="Ваш пароль">
+                </div>
+                <div class="remember-me">
+                    <input type="checkbox" id="rememberMe" checked>
+                    <label for="rememberMe">Запомнить меня</label>
                 </div>
                 <div class="error-message" id="loginError"></div>
                 <div class="form-actions">
                     <button type="button" class="auth-btn" onclick="login()">Войти</button>
+                </div>
+                <div style="text-align: center; margin-top: 1rem;">
+                    <a href="#" onclick="showForgotPassword()" style="color: #4285f4; font-size: 0.9rem;">Забыли пароль?</a>
                 </div>
             </form>
         </div>
@@ -252,24 +286,43 @@
             <form id="registerForm">
                 <div class="form-group">
                     <label for="registerUsername">Имя пользователя</label>
-                    <input type="text" id="registerUsername" required>
+                    <input type="text" id="registerUsername" required placeholder="Придумайте логин">
                 </div>
                 <div class="form-group">
                     <label for="registerEmail">Email</label>
-                    <input type="email" id="registerEmail" required>
+                    <input type="email" id="registerEmail" required placeholder="Ваш email">
                 </div>
                 <div class="form-group">
                     <label for="registerPassword">Пароль</label>
-                    <input type="password" id="registerPassword" required>
+                    <input type="password" id="registerPassword" required placeholder="Не менее 6 символов">
                 </div>
                 <div class="form-group">
                     <label for="registerConfirmPassword">Подтвердите пароль</label>
-                    <input type="password" id="registerConfirmPassword" required>
+                    <input type="password" id="registerConfirmPassword" required placeholder="Повторите пароль">
                 </div>
                 <div class="error-message" id="registerError"></div>
                 <div class="success-message" id="registerSuccess"></div>
                 <div class="form-actions">
                     <button type="button" class="auth-btn" onclick="register()">Зарегистрироваться</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Модальное окно восстановления пароля -->
+    <div id="forgotPasswordModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="hideModal('forgotPasswordModal')">&times;</span>
+            <h2>Восстановление пароля</h2>
+            <form id="forgotPasswordForm">
+                <div class="form-group">
+                    <label for="forgotEmail">Email</label>
+                    <input type="email" id="forgotEmail" required placeholder="Ваш email">
+                </div>
+                <div class="error-message" id="forgotError"></div>
+                <div class="success-message" id="forgotSuccess"></div>
+                <div class="form-actions">
+                    <button type="button" class="auth-btn" onclick="sendResetLink()">Отправить ссылку</button>
                 </div>
             </form>
         </div>
@@ -314,11 +367,20 @@
             } else if (id === 'loginModal') {
                 document.getElementById('loginError').textContent = '';
                 document.getElementById('loginForm').reset();
+            } else if (id === 'forgotPasswordModal') {
+                document.getElementById('forgotError').textContent = '';
+                document.getElementById('forgotSuccess').textContent = '';
+                document.getElementById('forgotPasswordForm').reset();
             }
         }
         
         function hideModal(id) {
             document.getElementById(id).style.display = 'none';
+        }
+        
+        function showForgotPassword() {
+            hideModal('loginModal');
+            showModal('forgotPasswordModal');
         }
 
         // Хеширование пароля (упрощенное для демонстрации)
@@ -368,7 +430,9 @@
                 username,
                 email, 
                 password: hashPassword(password), // В реальном приложении используйте более надежное хеширование
-                createdAt: new Date().toISOString()
+                createdAt: new Date().toISOString(),
+                isVerified: false,
+                verifyToken: Math.random().toString(36).substring(2, 15)
             };
             localStorage.setItem('cryptoAppUsers', JSON.stringify(users));
             
@@ -399,6 +463,7 @@
         function login() {
             const email = document.getElementById('loginEmail').value.trim();
             const password = document.getElementById('loginPassword').value;
+            const remember = document.getElementById('rememberMe').checked;
             const errorElement = document.getElementById('loginError');
             
             // Проверяем пользователя
@@ -407,6 +472,11 @@
             
             if (!user || user.password !== hashPassword(password)) {
                 errorElement.textContent = 'Неверный email или пароль';
+                return;
+            }
+            
+            if (!user.isVerified) {
+                errorElement.textContent = 'Подтвердите почту!';
                 return;
             }
             
@@ -422,15 +492,62 @@
                 alerts: []
             };
             
+            if (remember) {
+                const rememberToken = Math.random().toString(36).substring(2, 15);
+                user.rememberToken = hashPassword(rememberToken);
+                localStorage.setItem('cryptoAppUsers', JSON.stringify(users));
+                
+                // Устанавливаем куку на 30 дней
+                const date = new Date();
+                date.setTime(date.getTime() + (30 * 24 * 60 * 60 * 1000));
+                document.cookie = `remember=${rememberToken}; expires=${date.toUTCString()}; path=/`;
+            }
+            
             updateUI();
             hideModal('loginModal');
             loadPage(state.settings.lastPage);
+        }
+
+        // Отправка ссылки для сброса пароля
+        function sendResetLink() {
+            const email = document.getElementById('forgotEmail').value.trim();
+            const errorElement = document.getElementById('forgotError');
+            const successElement = document.getElementById('forgotSuccess');
+            
+            if (!email) {
+                errorElement.textContent = 'Введите email';
+                return;
+            }
+            
+            // Проверяем существование пользователя
+            const users = JSON.parse(localStorage.getItem('cryptoAppUsers')) || {};
+            const user = users[email];
+            
+            if (!user) {
+                errorElement.textContent = 'Пользователь с таким email не найден';
+                return;
+            }
+            
+            // Генерируем токен сброса (в реальном приложении отправляйте письмо)
+            user.resetToken = Math.random().toString(36).substring(2, 15);
+            user.resetTokenExpires = new Date(Date.now() + 3600000).toISOString(); // 1 час
+            localStorage.setItem('cryptoAppUsers', JSON.stringify(users));
+            
+            errorElement.textContent = '';
+            successElement.textContent = 'Ссылка для сброса пароля отправлена на ваш email';
+            
+            // В реальном приложении здесь должна быть отправка письма
+            console.log(`Ссылка для сброса пароля: https://yourdomain.com/reset_password.html?token=${user.resetToken}&email=${encodeURIComponent(email)}`);
         }
 
         // Выход пользователя
         function logout() {
             state.currentUser = null;
             localStorage.removeItem('cryptoAppUser');
+            
+            // Удаляем куку "Запомнить меня"
+            document.cookie = 'remember=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+            
             updateUI();
             loadPage('calculator');
         }
@@ -472,6 +589,54 @@
                 navContainer.classList.toggle('expanded');
             }
         });
+        
+        // Закрытие модальных окон при клике вне их области
+        window.addEventListener('click', function(event) {
+            if (event.target.className === 'modal') {
+                event.target.style.display = 'none';
+            }
+        });
+        
+        // Проверка куки "Запомнить меня" при загрузке
+        function checkRememberMe() {
+            const cookies = document.cookie.split(';');
+            let rememberToken = null;
+            
+            for (const cookie of cookies) {
+                const [name, value] = cookie.trim().split('=');
+                if (name === 'remember') {
+                    rememberToken = value;
+                    break;
+                }
+            }
+            
+            if (rememberToken) {
+                const users = JSON.parse(localStorage.getItem('cryptoAppUsers')) || {};
+                
+                for (const email in users) {
+                    const user = users[email];
+                    if (user.rememberToken && user.rememberToken === hashPassword(rememberToken)) {
+                        state.currentUser = { username: user.username, email };
+                        localStorage.setItem('cryptoAppUser', JSON.stringify(state.currentUser));
+                        
+                        // Загружаем настройки
+                        const allSettings = JSON.parse(localStorage.getItem('cryptoAppAllSettings')) || {};
+                        state.settings = allSettings[email] || {
+                            theme: 'dark',
+                            lastPage: 'calculator',
+                            alerts: []
+                        };
+                        
+                        updateUI();
+                        loadPage(state.settings.lastPage);
+                        break;
+                    }
+                }
+            }
+        }
+        
+        // Проверяем "Запомнить меня" при загрузке
+        checkRememberMe();
     </script>
 </body>
 </html>
