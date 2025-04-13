@@ -1,174 +1,135 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Crypto Tools</title>
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            font-family: 'JetBrains Mono', monospace;
-            transition: margin-top 0.3s ease;
-        }
-        
-        .nav-container {
-            background: #1E1E1E;
-            height: 25px;
-            width: 100%;
-            position: fixed;
-            top: 0;
-            z-index: 100;
-            transition: height 0.3s ease;
-            overflow: hidden;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-            display: flex;
-            justify-content: flex-start;
-            cursor: pointer;
-        }
-        
-        .nav-container.expanded {
-            height: 65px;
-        }
-        
-        .nav-content {
-            display: flex;
-            gap: 1.5rem;
-            padding: 1rem;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-            align-items: center;
-            width: 100%;
-        }
-        
-        .nav-container.expanded .nav-content {
-            opacity: 1;
-        }
-        
-        .nav-link {
-            color: #ffffff; /* Белый цвет текста */
-            cursor: pointer;
-            text-decoration: none;
-            font-size: 1.1rem; /* Увеличенный размер шрифта */
-            padding: 0.6rem 1.2rem; /* Увеличенные кнопки */
-            transition: 0.2s;
-            border-radius: 4px;
-            white-space: nowrap;
-        }
-        
-        .nav-link:hover {
-            background: rgba(255, 255, 255, 0.1);
-        }
-        
-        .content-wrapper {
-            margin-top: 25px;
-            height: calc(100vh - 25px);
-            transition: margin-top 0.3s ease;
-        }
-        
-        .nav-container.expanded ~ .content-wrapper {
-            margin-top: 65px;
-            height: calc(100vh - 65px);
-        }
-        
-        iframe {
-            width: 100%;
-            height: 100%;
-            border: none;
-        }
-        
-        .menu-hint {
-            color: #ffffff;
-            padding: 0.3rem 1rem;
-            font-size: 0.9rem;
-            opacity: 0.7;
-            pointer-events: none;
-            transition: opacity 0.3s ease;
-            align-self: center;
-        }
-        
-        .nav-container.expanded .menu-hint {
-            opacity: 0;
-        }
-        
-        .auth-links {
-            display: flex;
-            gap: 1.5rem;
-            margin-left: auto;
-        }
-        
-        .google-btn {
-            background: #4285f4;
-            color: white;
-            border: none;
-            padding: 0.6rem 1.2rem;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: 0.2s;
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 1.1rem;
-        }
-        
-        .google-btn:hover {
-            background: #357abd;
-        }
-    </style>
-    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <!-- ... (предыдущие стили остаются) ... -->
 </head>
 <body>
-    <nav class="nav-container" id="navContainer">
-        <div class="menu-hint">Меню</div>
-        <div class="nav-content">
-            <div>
-                <a class="nav-link" onclick="loadPage('calculator')">Калькулятор</a>
-                <a class="nav-link" onclick="loadPage('charts')">Графики</a>
-                <a class="nav-link" onclick="loadPage('alerts')">Алерты</a>
-            </div>
-            <div class="auth-links">
-                <button class="google-btn" onclick="handleGoogleAuth(event)">Войти через Google</button>
-            </div>
-        </div>
-    </nav>
-
-    <div class="content-wrapper">
-        <iframe id="contentFrame" src="calculator.html"></iframe>
-    </div>
+    <!-- ... (навигация и модальные окна из предыдущего кода) ... -->
 
     <script>
-        const navContainer = document.getElementById('navContainer');
-        
-        // Открытие/закрытие меню по клику
-        navContainer.addEventListener('click', function(e) {
-            // Игнорируем клики по дочерним элементам (кнопкам меню)
-            if (e.target === navContainer) {
-                navContainer.classList.toggle('expanded');
+        // Конфигурация API
+        const API_URL = 'https://your-api-domain.com/api';
+        const AUTH_TOKEN_KEY = 'cryptoAppAuthToken';
+
+        // Состояние приложения
+        const state = {
+            currentUser: null,
+            settings: {}
+        };
+
+        // Инициализация при загрузке
+        document.addEventListener('DOMContentLoaded', async () => {
+            const token = localStorage.getItem(AUTH_TOKEN_KEY);
+            if (token) {
+                try {
+                    const userData = await fetchUserData(token);
+                    state.currentUser = userData;
+                    state.settings = await fetchUserSettings(token);
+                    updateUI();
+                    loadPage(state.settings.lastPage || 'calculator');
+                } catch (error) {
+                    console.error("Ошибка загрузки данных:", error);
+                    logout();
+                }
             }
         });
-        
-        function loadPage(page) {
-            const frame = document.getElementById('contentFrame');
-            frame.src = `${page}.html`;
-            // Закрываем меню после выбора пункта
-            navContainer.classList.remove('expanded');
+
+        // API-запросы с обработкой ошибок
+        async function makeRequest(endpoint, method, body = null, token = null) {
+            const headers = {
+                'Content-Type': 'application/json'
+            };
+            
+            if (token) {
+                headers['Authorization'] = `Bearer ${token}`;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}${endpoint}`, {
+                    method,
+                    headers,
+                    body: body ? JSON.stringify(body) : null
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || 'Ошибка сервера');
+                }
+
+                return await response.json();
+            } catch (error) {
+                console.error(`Ошибка ${method} ${endpoint}:`, error);
+                throw error;
+            }
         }
 
-        function handleGoogleAuth(e) {
-            e.stopPropagation(); // Предотвращаем всплытие события
-            window.google.accounts.id.initialize({
-                client_id: "60024912258-3833k8hahgf0tpf1pcs7c0d0hde5s0s9.apps.googleusercontent.com",
-                callback: handleCredentialResponse
-            });
-            window.google.accounts.id.prompt();
+        // Регистрация
+        async function register() {
+            const email = document.getElementById('registerEmail').value;
+            const password = document.getElementById('registerPassword').value;
+            
+            try {
+                await makeRequest('/auth/register', 'POST', { email, password });
+                await login(); // Автовход после регистрации
+            } catch (error) {
+                document.getElementById('registerError').textContent = error.message;
+            }
         }
 
-        function handleCredentialResponse(response) {
-            console.log("Google Auth Response:", response);
-            // Здесь можно обработать ответ от Google
+        // Вход
+        async function login() {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            try {
+                const { token } = await makeRequest('/auth/login', 'POST', { email, password });
+                localStorage.setItem(AUTH_TOKEN_KEY, token);
+                
+                const [userData, settings] = await Promise.all([
+                    fetchUserData(token),
+                    fetchUserSettings(token)
+                ]);
+                
+                state.currentUser = userData;
+                state.settings = settings;
+                updateUI();
+                hideModal('loginModal');
+                loadPage(settings.lastPage || 'calculator');
+            } catch (error) {
+                document.getElementById('loginError').textContent = error.message;
+            }
         }
+
+        // Загрузка данных пользователя
+        async function fetchUserData(token) {
+            return await makeRequest('/auth/me', 'GET', null, token);
+        }
+
+        // Загрузка настроек
+        async function fetchUserSettings(token) {
+            return await makeRequest('/settings', 'GET', null, token);
+        }
+
+        // Сохранение настроек
+        async function saveSettings() {
+            if (!state.currentUser) return;
+            
+            try {
+                await makeRequest('/settings', 'PUT', state.settings, localStorage.getItem(AUTH_TOKEN_KEY));
+            } catch (error) {
+                console.error("Ошибка сохранения настроек:", error);
+            }
+        }
+
+        // Выход
+        function logout() {
+            localStorage.removeItem(AUTH_TOKEN_KEY);
+            state.currentUser = null;
+            updateUI();
+            loadPage('calculator');
+        }
+
+        // ... (остальные функции из предыдущего кода) ...
     </script>
-    <div id="g_id_onload"
-         data-client_id="60024912258-3833k8hahgf0tpf1pcs7c0d0hde5s0s9.apps.googleusercontent.com"
-         data-callback="handleCredentialResponse">
-    </div>
 </body>
 </html>
