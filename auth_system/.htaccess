@@ -1,0 +1,12 @@
+RewriteEngine On
+
+# Запретить доступ к файлам .env и конфигурационным файлам
+<FilesMatch "\.(env|ini|log|sql)$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+# Перенаправлять все запросы на index.php
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^ index.php [L]
