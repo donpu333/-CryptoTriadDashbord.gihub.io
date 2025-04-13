@@ -1,49 +1,35 @@
 <?php
 session_start();
-require_once 'db.php';
-require_once 'functions.php';
+require_once 'includes/db.php';
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // CSRF защита
-    if (!hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])) {
-        die('Ошибка безопасности');
-    }
+// Получение данных из формы
+$username = trim($_POST['username']);
+$password = $_POST['password'];
+$remember = isset($_POST['remember']);
 
-    // Очистка данных
-    $username = filter_input(INPUT_POST, 'username', FILTER_SANITIZE_STRING);
-    $password = $_POST['password'];
-    $remember = isset($_POST['remember']);
+// Поиск пользователя в базе
+$stmt = $pdo->prepare("SELECT * FROM users WHERE username = ?");
+$stmt->execute([$username]);
+$user = $stmt->fetch();
 
-    // Поиск пользователя
-    $stmt = $pdo->prepare("SELECT * FROM users WHERE username = ?");
-    $stmt->execute([$username]);
-    $user = $stmt->fetch();
-
-    if ($user && password_verify($password, $user['password_hash'])) {
-        // Успешная авторизация
-        $_SESSION['user_id'] = $user['id'];
+// Проверка пароля
+if ($user && password_verify($password, $user['password_hash'])) {
+    // Успешная авторизация
+    $_SESSION['user_id'] = $user['id'];
+    
+    // Механизм "Запомнить меня"
+    if ($remember) {
+        $token = bin2hex(random_bytes(32));
+        $expire = time() + 60*60*24*30; // 30 дней
         
-        // Механизм "Запомнить меня"
-        if ($remember) {
-            $token = bin2hex(random_bytes(64));
-            $expire = time() + 60*60*24*30; // 30 дней
-            
-            setcookie('remember_token', $token, [
-                'expires' => $expire,
-                'path' => '/',
-                'secure' => true,
-                'httponly' => true,
-                'samesite' => 'Strict'
-            ]);
-            
-            $stmt = $pdo->prepare("UPDATE users SET remember_token = ? WHERE id = ?");
-            $stmt->execute([hash('sha256', $token), $user['id']]);
-        }
+        setcookie('remember_token', $token, $expire, '/', '', true, true);
         
-        header('Location: profile.php');
-    } else {
-        $_SESSION['error'] = 'Неверные учетные данные';
-        header('Location: login.php');
+        $stmt = $pdo->prepare("UPDATE users SET remember_token = ? WHERE id = ?");
+        $stmt->execute([hash('sha256', $token), $user['id']]);
     }
-    exit;
+    
+    header('Location: profile.php');
+} else {
+    $_SESSION['error'] = 'Неверный логин или пароль';
+    header('Location: login.php');
 }
