@@ -24,39 +24,40 @@
             box-shadow: 0 2px 5px rgba(0,0,0,0.2);
             display: flex;
             justify-content: flex-start;
+            cursor: pointer;
         }
         
-        .nav-container:hover {
-            height: 55px;
+        .nav-container.expanded {
+            height: 65px;
         }
         
         .nav-content {
             display: flex;
-            gap: 1rem;
-            padding: 0.8rem 1rem;
+            gap: 1.5rem;
+            padding: 1rem;
             opacity: 0;
-            transition: opacity 0.3s ease 0.1s;
+            transition: opacity 0.3s ease;
             align-items: center;
+            width: 100%;
         }
         
-        .nav-container:hover .nav-content {
+        .nav-container.expanded .nav-content {
             opacity: 1;
         }
         
         .nav-link {
-            color: #2196F3;
+            color: #ffffff; /* Белый цвет текста */
             cursor: pointer;
             text-decoration: none;
-            font-size: 0.9rem;
-            padding: 0.4rem 1rem;
+            font-size: 1.1rem; /* Увеличенный размер шрифта */
+            padding: 0.6rem 1.2rem; /* Увеличенные кнопки */
             transition: 0.2s;
             border-radius: 4px;
             white-space: nowrap;
         }
         
         .nav-link:hover {
-            color: #1976D2;
-            background: rgba(33, 150, 243, 0.1);
+            background: rgba(255, 255, 255, 0.1);
         }
         
         .content-wrapper {
@@ -65,9 +66,9 @@
             transition: margin-top 0.3s ease;
         }
         
-        .nav-container:hover ~ .content-wrapper {
-            margin-top: 55px;
-            height: calc(100vh - 55px);
+        .nav-container.expanded ~ .content-wrapper {
+            margin-top: 65px;
+            height: calc(100vh - 65px);
         }
         
         iframe {
@@ -77,39 +78,97 @@
         }
         
         .menu-hint {
-            color: #2196F3;
+            color: #ffffff;
             padding: 0.3rem 1rem;
-            font-size: 0.8rem;
+            font-size: 0.9rem;
             opacity: 0.7;
             pointer-events: none;
             transition: opacity 0.3s ease;
             align-self: center;
         }
         
-        .nav-container:hover .menu-hint {
+        .nav-container.expanded .menu-hint {
             opacity: 0;
         }
+        
+        .auth-links {
+            display: flex;
+            gap: 1.5rem;
+            margin-left: auto;
+        }
+        
+        .google-btn {
+            background: #4285f4;
+            color: white;
+            border: none;
+            padding: 0.6rem 1.2rem;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: 0.2s;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.1rem;
+        }
+        
+        .google-btn:hover {
+            background: #357abd;
+        }
     </style>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body>
-    <nav class="nav-container">
+    <nav class="nav-container" id="navContainer">
         <div class="menu-hint">Меню</div>
         <div class="nav-content">
-            <a class="nav-link" onclick="loadPage('calculator')">Калькулятор</a>
-            <a class="nav-link" onclick="loadPage('charts')">Графики</a>
-            <a class="nav-link" onclick="loadPage('alerts')">Алерты</a>
+            <div>
+                <a class="nav-link" onclick="loadPage('calculator')">Калькулятор</a>
+                <a class="nav-link" onclick="loadPage('charts')">Графики</a>
+                <a class="nav-link" onclick="loadPage('alerts')">Алерты</a>
+            </div>
+            <div class="auth-links">
+                <button class="google-btn" onclick="handleGoogleAuth(event)">Войти через Google</button>
+            </div>
         </div>
     </nav>
-    
+
     <div class="content-wrapper">
         <iframe id="contentFrame" src="calculator.html"></iframe>
     </div>
 
     <script>
+        const navContainer = document.getElementById('navContainer');
+        
+        // Открытие/закрытие меню по клику
+        navContainer.addEventListener('click', function(e) {
+            // Игнорируем клики по дочерним элементам (кнопкам меню)
+            if (e.target === navContainer) {
+                navContainer.classList.toggle('expanded');
+            }
+        });
+        
         function loadPage(page) {
             const frame = document.getElementById('contentFrame');
             frame.src = `${page}.html`;
+            // Закрываем меню после выбора пункта
+            navContainer.classList.remove('expanded');
+        }
+
+        function handleGoogleAuth(e) {
+            e.stopPropagation(); // Предотвращаем всплытие события
+            window.google.accounts.id.initialize({
+                client_id: "60024912258-3833k8hahgf0tpf1pcs7c0d0hde5s0s9.apps.googleusercontent.com",
+                callback: handleCredentialResponse
+            });
+            window.google.accounts.id.prompt();
+        }
+
+        function handleCredentialResponse(response) {
+            console.log("Google Auth Response:", response);
+            // Здесь можно обработать ответ от Google
         }
     </script>
+    <div id="g_id_onload"
+         data-client_id="60024912258-3833k8hahgf0tpf1pcs7c0d0hde5s0s9.apps.googleusercontent.com"
+         data-callback="handleCredentialResponse">
+    </div>
 </body>
 </html>
