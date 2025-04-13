@@ -116,7 +116,6 @@
             background: #357abd;
         }
         
-        /* Модальные окна */
         .modal {
             display: none;
             position: fixed;
@@ -215,7 +214,6 @@
             text-decoration: none;
         }
         
-        /* Адаптивность */
         @media (max-width: 768px) {
             .nav-content {
                 flex-direction: column;
@@ -259,7 +257,6 @@
         <iframe id="contentFrame" src="calculator.html"></iframe>
     </div>
 
-    <!-- Модальное окно входа -->
     <div id="loginModal" class="modal">
         <div class="modal-content">
             <span class="close-btn" onclick="hideModal('loginModal')">&times;</span>
@@ -284,7 +281,6 @@
         </div>
     </div>
 
-    <!-- Модальное окно регистрации -->
     <div id="registerModal" class="modal">
         <div class="modal-content">
             <span class="close-btn" onclick="hideModal('registerModal')">&times;</span>
@@ -314,7 +310,7 @@
     </div>
 
     <script>
-        // Конфигурация API (замените на ваш реальный URL)
+        // Конфигурация API
         const API_BASE_URL = 'http://localhost:3000/api';
         const AUTH_TOKEN_KEY = 'cryptoAppAuthToken';
         
@@ -333,9 +329,16 @@
             const token = localStorage.getItem(AUTH_TOKEN_KEY);
             if (token) {
                 try {
-                    const userData = await fetchWithToken('/auth/me', 'GET', null, token);
+                    const userData = await fetchWithToken('/auth/me', token);
                     state.currentUser = userData;
-                    state.settings = await fetchWithToken('/settings', 'GET', null, token);
+                    
+                    try {
+                        const settings = await fetchWithToken('/settings', token);
+                        state.settings = settings;
+                    } catch (e) {
+                        console.log("Используем настройки по умолчанию");
+                    }
+                    
                     applyUserSettings();
                     updateUI();
                     loadPage(state.settings.lastPage || 'calculator');
@@ -348,7 +351,7 @@
 
         // ========== API Функции ==========
         
-        async function fetchWithToken(endpoint, method = 'GET', body = null, token) {
+        async function fetchWithToken(endpoint, token, method = 'GET', body = null) {
             const headers = {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${token}`
@@ -412,26 +415,31 @@
             }
             
             try {
-                // Отправка данных на сервер
+                // Регистрация
                 await publicFetch('/auth/register', 'POST', { email, password });
                 
-                // Автоматический вход после успешной регистрации
+                // Автоматический вход после регистрации
                 const { token } = await publicFetch('/auth/login', 'POST', { email, password });
                 localStorage.setItem(AUTH_TOKEN_KEY, token);
                 
                 // Получение данных пользователя
-                const [userData, settings] = await Promise.all([
-                    fetchWithToken('/auth/me', 'GET', null, token),
-                    fetchWithToken('/settings', 'GET', null, token)
-                ]);
-                
+                const userData = await fetchWithToken('/auth/me', token);
                 state.currentUser = userData;
-                state.settings = settings;
+                
+                // Создаем настройки по умолчанию
+                state.settings = {
+                    theme: 'dark',
+                    lastPage: 'calculator',
+                    alerts: []
+                };
+                
+                // Сохраняем настройки
+                await fetchWithToken('/settings', token, 'PUT', state.settings);
                 
                 applyUserSettings();
                 updateUI();
                 hideModal('registerModal');
-                loadPage(settings.lastPage || 'calculator');
+                loadPage(state.settings.lastPage);
                 
             } catch (error) {
                 console.error("Ошибка регистрации:", error);
@@ -445,23 +453,31 @@
             const errorElement = document.getElementById('loginError');
             
             try {
-                // Аутентификация на сервере
+                // Аутентификация
                 const { token } = await publicFetch('/auth/login', 'POST', { email, password });
                 localStorage.setItem(AUTH_TOKEN_KEY, token);
                 
-                // Получение данных пользователя и настроек
-                const [userData, settings] = await Promise.all([
-                    fetchWithToken('/auth/me', 'GET', null, token),
-                    fetchWithToken('/settings', 'GET', null, token)
-                ]);
-                
+                // Получение данных пользователя
+                const userData = await fetchWithToken('/auth/me', token);
                 state.currentUser = userData;
-                state.settings = settings;
+                
+                // Получение настроек
+                try {
+                    const settings = await fetchWithToken('/settings', token);
+                    state.settings = settings;
+                } catch (e) {
+                    console.log("Используем настройки по умолчанию");
+                    state.settings = {
+                        theme: 'dark',
+                        lastPage: 'calculator',
+                        alerts: []
+                    };
+                }
                 
                 applyUserSettings();
                 updateUI();
                 hideModal('loginModal');
-                loadPage(settings.lastPage || 'calculator');
+                loadPage(state.settings.lastPage);
                 
             } catch (error) {
                 console.error("Ошибка входа:", error);
@@ -479,29 +495,10 @@
 
         // ========== Функции работы с настройками ==========
         
-        async function saveSettings() {
-            if (!state.currentUser) return;
-            
-            try {
-                const token = localStorage.getItem(AUTH_TOKEN_KEY);
-                const updatedSettings = await fetchWithToken(
-                    '/settings', 
-                    'PUT', 
-                    state.settings, 
-                    token
-                );
-                state.settings = updatedSettings;
-            } catch (error) {
-                console.error("Ошибка сохранения настроек:", error);
-            }
-        }
-        
         function applyUserSettings() {
             // Применяем тему
             document.body.style.backgroundColor = state.settings.theme === 'dark' ? '#121212' : '#f5f5f5';
             document.body.style.color = state.settings.theme === 'dark' ? '#ffffff' : '#000000';
-            
-            // Здесь можно добавить применение других настроек
         }
         
         function resetToDefaultSettings() {
@@ -537,20 +534,26 @@
             navContainer.classList.remove('expanded');
             
             // Сохраняем последнюю открытую страницу
-            if (state.currentUser) {
+            if (state.currentUser && state.settings.lastPage !== page) {
                 state.settings.lastPage = page;
                 saveSettings();
             }
         }
         
+        async function saveSettings() {
+            if (!state.currentUser) return;
+            
+            try {
+                const token = localStorage.getItem(AUTH_TOKEN_KEY);
+                await fetchWithToken('/settings', token, 'PUT', state.settings);
+            } catch (error) {
+                console.error("Ошибка сохранения настроек:", error);
+            }
+        }
+        
         function showModal(id) {
             document.getElementById(id).style.display = 'block';
-            // Очищаем ошибки при открытии
             document.getElementById(id.replace('Modal', 'Error')).textContent = '';
-            // Очищаем поля формы, кроме регистрации (чтобы не стирать подтверждение пароля)
-            if (id === 'loginModal') {
-                document.getElementById('loginPassword').value = '';
-            }
         }
         
         function hideModal(id) {
@@ -560,11 +563,16 @@
         function switchToRegister() {
             hideModal('loginModal');
             showModal('registerModal');
+            document.getElementById('registerEmail').value = document.getElementById('loginEmail').value;
+            document.getElementById('loginPassword').value = '';
         }
         
         function switchToLogin() {
             hideModal('registerModal');
             showModal('loginModal');
+            document.getElementById('loginEmail').value = document.getElementById('registerEmail').value;
+            document.getElementById('registerPassword').value = '';
+            document.getElementById('registerConfirmPassword').value = '';
         }
 
         // ========== Обработчики событий ==========
@@ -575,7 +583,6 @@
             }
         });
         
-        // Закрытие модальных окон при клике вне их области
         window.addEventListener('click', function(event) {
             if (event.target.classList.contains('modal')) {
                 const modals = document.querySelectorAll('.modal');
@@ -585,7 +592,6 @@
             }
         });
         
-        // Обработка отправки форм по Enter
         document.getElementById('loginForm').addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
                 e.preventDefault();
