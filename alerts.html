@@ -310,15 +310,6 @@
             margin-left: 0.5rem;
         }
         
-        .new-badge {
-            background-color: var(--accent-green);
-            color: white;
-            padding: 0.25rem 0.5rem;
-            border-radius: 0.25rem;
-            font-size: 0.75rem;
-            margin-left: 0.5rem;
-        }
-
         .market-tabs {
             display: flex;
             gap: 0.5rem;
@@ -1079,7 +1070,6 @@
         let currentAlertFilter = 'active';
         let alertCooldowns = {};
         let currentMarketType = 'futures';
-        let newPairs = [];
         let apiManager;
         let priceUpdateInterval = null;
         let currentSymbol = null;
@@ -1446,10 +1436,6 @@
                     }
                 }
 
-                // Получаем текущие символы для сравнения
-                const currentFuturesSymbols = allFutures.map(c => c.symbol);
-                const currentSpotSymbols = allSpot.map(c => c.symbol);
-
                 const futuresResponse = await fetch('https://fapi.binance.com/fapi/v1/exchangeInfo');
                 if (!futuresResponse.ok) throw new Error(`Futures API error: ${futuresResponse.status}`);
                 const futuresData = await futuresResponse.json();
@@ -1458,6 +1444,8 @@
                 if (!futuresTickerResponse.ok) throw new Error(`Futures ticker error: ${futuresTickerResponse.status}`);
                 const futuresTickerData = await futuresTickerResponse.json();
                 
+                // Используем Set для устранения дубликатов
+                const futuresSymbols = new Set();
                 const newFutures = futuresData.symbols
                     .filter(s => s.contractType === 'PERPETUAL' && s.quoteAsset === 'USDT')
                     .map(symbol => {
@@ -1470,9 +1458,15 @@
                             priceChangePercent: parseFloat(ticker.priceChangePercent) || 0,
                             volume: parseFloat(ticker.quoteVolume) || 0,
                             contractType: symbol.contractType,
-                            marketType: 'futures',
-                            isNew: !currentFuturesSymbols.includes(symbol.symbol)
+                            marketType: 'futures'
                         };
+                    })
+                    .filter(item => {
+                        if (futuresSymbols.has(item.symbol)) {
+                            return false;
+                        }
+                        futuresSymbols.add(item.symbol);
+                        return true;
                     });
                 
                 const spotResponse = await fetch('https://api.binance.com/api/v3/exchangeInfo');
@@ -1483,6 +1477,8 @@
                 if (!spotTickerResponse.ok) throw new Error(`Spot ticker error: ${spotTickerResponse.status}`);
                 const spotTickerData = await spotTickerResponse.json();
                 
+                // Используем Set для устранения дубликатов
+                const spotSymbols = new Set();
                 const newSpot = spotData.symbols
                     .filter(s => s.quoteAsset === 'USDT' || s.quoteAsset === 'BTC' || s.quoteAsset === 'ETH' || s.quoteAsset === 'BNB')
                     .map(symbol => {
@@ -1494,15 +1490,16 @@
                             price: parseFloat(ticker.lastPrice) || 0,
                             priceChangePercent: parseFloat(ticker.priceChangePercent) || 0,
                             volume: parseFloat(ticker.quoteVolume) || 0,
-                            marketType: 'spot',
-                            isNew: !currentSpotSymbols.includes(symbol.symbol)
+                            marketType: 'spot'
                         };
+                    })
+                    .filter(item => {
+                        if (spotSymbols.has(item.symbol)) {
+                            return false;
+                        }
+                        spotSymbols.add(item.symbol);
+                        return true;
                     });
-                
-                // Обновляем список новых пар
-                const newFuturesPairs = newFutures.filter(c => c.isNew).map(c => c.symbol);
-                const newSpotPairs = newSpot.filter(c => c.isNew).map(c => c.symbol);
-                newPairs = [...new Set([...newPairs, ...newFuturesPairs, ...newSpotPairs])];
                 
                 if (initialLoad) {
                     allFutures = newFutures.sort((a, b) => b.volume - a.volume);
@@ -1511,13 +1508,6 @@
                     allFutures = [...allFutures, ...newFutures].sort((a, b) => b.volume - a.volume);
                     allSpot = [...allSpot, ...newSpot].sort((a, b) => b.volume - a.volume);
                 }
-                
-                // Удаляем делистированные пары
-                const currentFuturesSymbolsSet = new Set(newFutures.map(c => c.symbol));
-                const currentSpotSymbolsSet = new Set(newSpot.map(c => c.symbol));
-                
-                allFutures = allFutures.filter(c => currentFuturesSymbolsSet.has(c.symbol));
-                allSpot = allSpot.filter(c => currentSpotSymbolsSet.has(c.symbol));
                 
                 filteredMarketData = currentMarketType === 'futures' 
                     ? [...allFutures].slice(0, currentPage * pageSize)
@@ -1666,8 +1656,6 @@
                     '<span class="spot-badge">SPOT</span>' : 
                     '<span class="futures-badge">FUTURES</span>';
                 
-                const newBadge = coin.isNew ? '<span class="new-badge">NEW</span>' : '';
-                
                 html += `
                     <tr data-symbol="${coin.symbol}" class="hover:bg-gray-800">
                         <td class="px-6 py-4 whitespace-nowrap">
@@ -1676,7 +1664,7 @@
                         <td class="px-6 py-4 whitespace-nowrap">
                             <div class="flex items-center">
                                 <div>
-                                    <div class="text-sm font-medium text-light">${coin.symbol} ${marketBadge} ${newBadge}</div>
+                                    <div class="text-sm font-medium text-light">${coin.symbol} ${marketBadge}</div>
                                     <div class="text-sm text-gray-400">${coin.marketType === 'spot' ? 'Spot' : 'Perpetual'}</div>
                                 </div>
                             </div>
