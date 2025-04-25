@@ -9,8 +9,6 @@
     <link rel="preconnect" href="https://api.binance.com">
     <link rel="preconnect" href="https://fapi.binance.com">
     <link rel="preconnect" href="https://stream.binance.com">
-    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -479,140 +477,6 @@
             line-height: 1.5;
         }
 
-        .chart-settings-panel {
-            display: flex;
-            padding: 8px 15px;
-            background-color: var(--bg-primary);
-            border-bottom: 1px solid var(--border-color);
-            gap: 10px;
-            position: sticky;
-            top: 0;
-            z-index: 10;
-        }
-
-        .chart-settings-btn {
-            background: none;
-            border: none;
-            color: var(--text-secondary);
-            cursor: pointer;
-            font-size: 1em;
-            padding: 5px;
-            border-radius: 4px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 30px;
-            height: 30px;
-        }
-
-        .chart-settings-btn:hover {
-            background-color: var(--hover-color);
-            color: var(--text-primary);
-        }
-
-        .chart-settings-btn.active {
-            color: var(--accent-blue);
-        }
-
-        .settings-modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.7);
-            z-index: 1000;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .settings-modal-content {
-            background-color: var(--bg-secondary);
-            padding: 20px;
-            border-radius: 5px;
-            width: 500px;
-            max-width: 90%;
-            max-height: 80vh;
-            overflow-y: auto;
-        }
-
-        .settings-tabs {
-            display: flex;
-            border-bottom: 1px solid var(--border-color);
-            margin-bottom: 15px;
-        }
-
-        .settings-tab {
-            padding: 8px 15px;
-            cursor: pointer;
-            background-color: var(--bg-secondary);
-            border-bottom: 2px solid transparent;
-            font-weight: 500;
-        }
-
-        .settings-tab.active {
-            border-bottom: 2px solid var(--accent-blue);
-        }
-
-        .settings-tab-content {
-            display: none;
-        }
-
-        .settings-tab-content.active {
-            display: block;
-        }
-
-        .settings-group {
-            margin-bottom: 15px;
-        }
-
-        .settings-group-title {
-            font-weight: 500;
-            margin-bottom: 10px;
-            color: var(--accent-blue);
-        }
-
-        .settings-option {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-
-        .settings-option label {
-            flex: 1;
-        }
-
-        .settings-option select,
-        .settings-option input[type="number"] {
-            width: 150px;
-            padding: 5px;
-            background-color: var(--bg-primary);
-            border: 1px solid var(--border-color);
-            color: var(--text-primary);
-        }
-
-        .settings-option-color {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .color-preview {
-            width: 20px;
-            height: 20px;
-            border-radius: 4px;
-            border: 1px solid var(--border-color);
-        }
-
-        .settings-buttons {
-            display: flex;
-            justify-content: flex-end;
-            gap: 10px;
-            margin-top: 20px;
-        }
-
         .market-type-selector {
             display: flex;
             padding: 5px 15px;
@@ -763,54 +627,11 @@
             color: var(--text-primary);
             font-family: 'JetBrains Mono', monospace;
         }
-
-        .sound-toggle {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            width: 40px;
-            height: 40px;
-            background-color: var(--bg-secondary);
-            border: 1px solid var(--border-color);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            z-index: 100;
-        }
-
-        .pulse {
-            animation: pulse 1s infinite;
-        }
-
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-            100% { transform: scale(1); }
-        }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="chart-container">
-            <div class="chart-settings-panel">
-                <button class="chart-settings-btn" id="chartSettingsBtn" title="Настройки графика">
-                    <i class="fas fa-cog"></i>
-                </button>
-                <button class="chart-settings-btn" id="indicatorsBtn" title="Индикаторы">
-                    <i class="fas fa-chart-line"></i>
-                </button>
-                <button class="chart-settings-btn" id="drawingToolsBtn" title="Инструменты рисования">
-                    <i class="fas fa-pencil-alt"></i>
-                </button>
-                <button class="chart-settings-btn" id="fullscreenBtn" title="Полноэкранный режим">
-                    <i class="fas fa-expand"></i>
-                </button>
-                <button class="chart-settings-btn" id="screenshotBtn" title="Сделать скриншот">
-                    <i class="fas fa-camera"></i>
-                </button>
-            </div>
             <div id="tradingview-chart" class="chart"></div>
         </div>
         <div class="ticker-list">
@@ -883,161 +704,6 @@
         </div>
     </div>
 
-    <div class="settings-modal" id="chartSettingsModal">
-        <div class="settings-modal-content">
-            <div class="modal-header">
-                <div class="modal-title">Настройки графика</div>
-                <button class="close-modal">&times;</button>
-            </div>
-
-            <div class="settings-tabs">
-                <div class="settings-tab active" data-tab="appearance">Внешний вид</div>
-                <div class="settings-tab" data-tab="scales">Шкалы</div>
-                <div class="settings-tab" data-tab="trading">Торговля</div>
-            </div>
-
-            <div class="settings-tab-content active" data-tab="appearance">
-                <div class="settings-group">
-                    <div class="settings-group-title">Стиль графика</div>
-                    <div class="settings-option">
-                        <label for="chartStyle">Тип графика:</label>
-                        <select id="chartStyle">
-                            <option value="0">Свечи</option>
-                            <option value="1">Бары</option>
-                            <option value="2">Линия</option>
-                            <option value="3">Area</option>
-                            <option value="4">Heikin Ashi</option>
-                            <option value="7">Hollow Candles</option>
-                            <option value="8">Line Break</option>
-                            <option value="9">Kagi</option>
-                            <option value="10">Point & Figure</option>
-                            <option value="11">Renko</option>
-                        </select>
-                    </div>
-                    <div class="settings-option">
-                        <label for="candleStyle">Стиль свечей:</label>
-                        <select id="candleStyle">
-                            <option value="0">Обычные</option>
-                            <option value="1">Тонкие</option>
-                            <option value="2">Толстые</option>
-                        </select>
-                    </div>
-                    <div class="settings-option">
-                        <label for="upColor">Цвет роста:</label>
-                        <div class="settings-option-color">
-                            <input type="color" id="upColor" value="#26a69a">
-                            <div class="color-preview" id="upColorPreview" style="background-color: #26a69a;"></div>
-                        </div>
-                    </div>
-                    <div class="settings-option">
-                        <label for="downColor">Цвет падения:</label>
-                        <div class="settings-option-color">
-                            <input type="color" id="downColor" value="#ef5350">
-                            <div class="color-preview" id="downColorPreview" style="background-color: #ef5350;"></div>
-                        </div>
-                    </div>
-                    <div class="settings-option">
-                        <label for="wickColor">Цвет фитилей:</label>
-                        <div class="settings-option-color">
-                            <input type="color" id="wickColor" value="#000000">
-                            <div class="color-preview" id="wickColorPreview" style="background-color: #000000;"></div>
-                        </div>
-                    </div>
-                    <div class="settings-option">
-                        <label for="borderColor">Цвет границ:</label>
-                        <div class="settings-option-color">
-                            <input type="color" id="borderColor" value="#378658">
-                            <div class="color-preview" id="borderColorPreview" style="background-color: #378658;"></div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="settings-group">
-                    <div class="settings-group-title">Фон графика</div>
-                    <div class="settings-option">
-                        <label for="backgroundColor">Цвет фона:</label>
-                        <div class="settings-option-color">
-                            <input type="color" id="backgroundColor" value="#121212">
-                            <div class="color-preview" id="backgroundColorPreview" style="background-color: #121212;"></div>
-                        </div>
-                    </div>
-                    <div class="settings-option">
-                        <label for="gridColor">Цвет сетки:</label>
-                        <div class="settings-option-color">
-                            <input type="color" id="gridColor" value="#2d2d2d">
-                            <div class="color-preview" id="gridColorPreview" style="background-color: #2d2d2d;"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="settings-tab-content" data-tab="scales">
-                <div class="settings-group">
-                    <div class="settings-group-title">Основные настройки</div>
-                    <div class="settings-option">
-                        <label for="priceScale">Тип шкалы цены:</label>
-                        <select id="priceScale">
-                            <option value="0">Логарифмическая</option>
-                            <option value="1">Линейная</option>
-                            <option value="2">Процентная</option>
-                            <option value="3">Индексная</option>
-                        </select>
-                    </div>
-                    <div class="settings-option">
-                        <label for="timeScale">Тип шкалы времени:</label>
-                        <select id="timeScale">
-                            <option value="0">Регулярная</option>
-                            <option value="1">Не регулярная</option>
-                        </select>
-                    </div>
-                    <div class="settings-option">
-                        <label for="rightMargin">Правое поле (px):</label>
-                        <input type="number" id="rightMargin" min="0" max="100" value="30">
-                    </div>
-                </div>
-
-                <div class="settings-group">
-                    <div class="settings-group-title">Отображение цены</div>
-                    <div class="settings-option">
-                        <label for="showPriceAxis">Показывать шкалу цены:</label>
-                        <input type="checkbox" id="showPriceAxis" checked>
-                    </div>
-                    <div class="settings-option">
-                        <label for="priceScaleMode">Режим шкалы цены:</label>
-                        <select id="priceScaleMode">
-                            <option value="0">Справа</option>
-                            <option value="1">Слева</option>
-                            <option value="2">С обеих сторон</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
-
-            <div class="settings-tab-content" data-tab="trading">
-                <div class="settings-group">
-                    <div class="settings-group-title">Торговые параметры</div>
-                    <div class="settings-option">
-                        <label for="showTradingPanel">Показывать торговую панель:</label>
-                        <input type="checkbox" id="showTradingPanel" checked>
-                    </div>
-                    <div class="settings-option">
-                        <label for="showOrderLines">Показывать линии ордеров:</label>
-                        <input type="checkbox" id="showOrderLines" checked>
-                    </div>
-                    <div class="settings-option">
-                        <label for="showPositionLines">Показывать линии позиций:</label>
-                        <input type="checkbox" id="showPositionLines" checked>
-                    </div>
-                </div>
-            </div>
-
-            <div class="settings-buttons">
-                <button class="modal-btn" id="resetSettingsBtn">Сбросить</button>
-                <button class="modal-btn primary" id="saveSettingsBtn">Сохранить</button>
-            </div>
-        </div>
-    </div>
-
     <div class="context-menu" id="flagContextMenu">
         <div class="context-menu-item" data-flag="red">
             <div class="flag flag-red"></div>
@@ -1061,38 +727,10 @@
         </div>
     </div>
 
-    <div class="sound-toggle" id="soundToggle" title="Включить/выключить звук">
-        <i class="fas fa-volume-up"></i>
-    </div>
-
     <script type="text/javascript">
         // Глобальные переменные для управления состоянием загрузки
         let TVScriptLoaded = false;
         let DashboardInstance = null;
-        let AudioContextInitialized = false;
-
-        // Функция предварительной загрузки звуков
-        function preloadSounds() {
-            if (!AudioContextInitialized) {
-                try {
-                    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-
-                    // Предзагрузка звукового файла для роста цены
-                    fetch('https://assets.mixkit.co/sfx/preview/mixkit-positive-interface-beep-221.mp3')
-                        .then(response => response.arrayBuffer())
-                        .then(data => audioContext.decodeAudioData(data));
-
-                    // Предзагрузка звукового файла для падения цены
-                    fetch('https://assets.mixkit.co/sfx/preview/mixkit-alarm-digital-clock-beep-989.mp3')
-                        .then(response => response.arrayBuffer())
-                        .then(data => audioContext.decodeAudioData(data));
-
-                    AudioContextInitialized = true;
-                } catch (e) {
-                    console.log("AudioContext не поддерживается в этом браузере");
-                }
-            }
-        }
 
         // Функция загрузки TradingView
         function loadTradingView() {
@@ -1133,7 +771,6 @@
         document.addEventListener('DOMContentLoaded', () => {
             // Параллельная загрузка данных и скрипта TradingView
             loadTradingView();
-            preloadSounds();
         });
 
         class BinanceDashboard {
@@ -1148,29 +785,10 @@
                     sortBy: 'volume',
                     sortDirection: 'desc',
                     marketType: localStorage.getItem('marketType') || 'futures',
-                    chartSettings: JSON.parse(localStorage.getItem('chartSettings')) || {
-                        chartStyle: '0',
-                        candleStyle: '0',
-                        upColor: '#26a69a',
-                        downColor: '#ef5350',
-                        wickColor: '#000000',
-                        borderColor: '#378658',
-                        backgroundColor: '#121212',
-                        gridColor: '#2d2d2d',
-                        priceScale: '1',
-                        timeScale: '0',
-                        rightMargin: '30',
-                        showPriceAxis: true,
-                        priceScaleMode: '0',
-                        showTradingPanel: true,
-                        showOrderLines: true,
-                        showPositionLines: true
-                    },
                     tvWidget: null,
                     ws: null,
                     wsReconnectAttempts: 0,
                     maxWsReconnectAttempts: 5,
-                    soundEnabled: localStorage.getItem('soundEnabled') === 'true',
                     lastRenderTime: 0,
                     renderDebounce: 200,
                     searchQuery: ''
@@ -1178,8 +796,6 @@
 
                 this.tickers = [];
                 this.allSymbolsCache = [];
-                this.upSound = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-positive-interface-beep-221.mp3');
-                this.downSound = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-alarm-digital-clock-beep-989.mp3');
 
                 // Начинаем инициализацию данных
                 this.initializeData();
@@ -1187,7 +803,12 @@
 
             async initializeData() {
                 try {
-                    await this.fetchAllSymbols();
+                    // Загружаем данные параллельно
+                    const [symbolsData, tickersData] = await Promise.all([
+                        this.fetchAllSymbols(),
+                        this.fetchInitialTickers()
+                    ]);
+
                     this.initializeTickers();
                     this.connectWebSocket();
 
@@ -1199,12 +820,23 @@
                     this.renderTickerList();
                     this.setupUIEventListeners();
                     this.setupDragAndDrop();
-                    this.updateSoundToggle();
                 } catch (error) {
                     console.error("Ошибка инициализации данных:", error);
                     // Повторная попытка через 5 секунд
                     setTimeout(() => this.initializeData(), 5000);
                 }
+            }
+
+            async fetchInitialTickers() {
+                const endpoint = this.state.marketType === 'futures' 
+                    ? 'https://fapi.binance.com/fapi/v1/ticker/24hr'
+                    : 'https://api.binance.com/api/v3/ticker/24hr';
+                
+                const response = await fetch(endpoint);
+                const data = await response.json();
+                
+                // Кэшируем начальные данные
+                this.initialTickersData = data;
             }
 
             initTradingView(symbol) {
@@ -1226,42 +858,41 @@
                 const marketPrefix = 'BINANCE';
 
                 try {
+                    // Упрощенные настройки для более быстрой загрузки
                     this.state.tvWidget = new TradingView.widget({
                         "autosize": true,
                         "symbol": `${marketPrefix}:${formattedSymbol}`,
                         "interval": "1D",
                         "timezone": "Etc/UTC",
                         "theme": "dark",
-                        "style": this.state.chartSettings.chartStyle,
+                        "style": "0", // Простые свечи по умолчанию
                         "locale": "ru",
                         "toolbar_bg": "#1E1E1E",
                         "enable_publishing": false,
                         "hide_top_toolbar": false,
                         "hide_side_toolbar": false,
                         "allow_symbol_change": false,
-                     "backgroundColor": "rgba(0, 0, 0, 1)",
-                       "gridColor": "rgba(0, 0, 0, 0.06)",
                         "container_id": "tradingview-chart",
                         "studies_overrides": {
-                            "volume.volume.color.0": this.state.chartSettings.downColor,
-                            "volume.volume.color.1": this.state.chartSettings.upColor
+                            "volume.volume.color.0": "#ef5350",
+                            "volume.volume.color.1": "#26a69a"
                         },
                         "overrides": {
-                            "mainSeriesProperties.style": parseInt(this.state.chartSettings.chartStyle),
-                            "mainSeriesProperties.candleStyle.upColor": this.state.chartSettings.upColor,
-                            "mainSeriesProperties.candleStyle.downColor": this.state.chartSettings.downColor,
-                            "mainSeriesProperties.candleStyle.borderUpColor": this.state.chartSettings.upColor,
-                            "mainSeriesProperties.candleStyle.borderDownColor": this.state.chartSettings.downColor,
-                            "mainSeriesProperties.candleStyle.wickUpColor": this.state.chartSettings.wickColor,
-                            "mainSeriesProperties.candleStyle.wickDownColor": this.state.chartSettings.wickColor,
-                            "paneProperties.background": this.state.chartSettings.backgroundColor,
-                            "paneProperties.vertGridProperties.color": this.state.chartSettings.gridColor,
-                            "paneProperties.horzGridProperties.color": this.state.chartSettings.gridColor,
-                            "scalesProperties.lineColor": this.state.chartSettings.gridColor,
+                            "mainSeriesProperties.style": 0, // Свечи
+                            "mainSeriesProperties.candleStyle.upColor": "#26a69a",
+                            "mainSeriesProperties.candleStyle.downColor": "#ef5350",
+                            "mainSeriesProperties.candleStyle.borderUpColor": "#26a69a",
+                            "mainSeriesProperties.candleStyle.borderDownColor": "#ef5350",
+                            "mainSeriesProperties.candleStyle.wickUpColor": "#000000",
+                            "mainSeriesProperties.candleStyle.wickDownColor": "#000000",
+                            "paneProperties.background": "#121212",
+                            "paneProperties.vertGridProperties.color": "#2d2d2d",
+                            "paneProperties.horzGridProperties.color": "#2d2d2d",
+                            "scalesProperties.lineColor": "#2d2d2d",
                             "scalesProperties.textColor": "#B0B0B0",
                             "symbolWatermarkProperties.color": "rgba(0, 0, 0, 0)",
-                            "volume.volume.color.0": this.state.chartSettings.downColor,
-                            "volume.volume.color.1": this.state.chartSettings.upColor
+                            "volume.volume.color.0": "#ef5350",
+                            "volume.volume.color.1": "#26a69a"
                         }
                     });
                 } catch (e) {
@@ -1271,7 +902,6 @@
                 }
             }
 
-            // Все остальные методы класса остаются без изменений
             async fetchAllSymbols() {
                 try {
                     const [futuresResponse, spotResponse] = await Promise.all([
@@ -1367,15 +997,7 @@
                             if (ticker.price !== newPrice) {
                                 ticker.prevPrice = ticker.price;
                                 ticker.price = newPrice;
-
-                                if (ticker.prevPrice > 0) {
-                                    const direction = newPrice > ticker.prevPrice ? 'up' : 'down';
-                                    this.flashPrice(ticker.symbol, direction);
-
-                                    if (this.state.soundEnabled && Math.abs(newPrice - ticker.prevPrice) > newPrice * 0.001) {
-                                        this.playSound(direction);
-                                    }
-                                }
+                                this.flashPrice(ticker.symbol, newPrice > ticker.prevPrice ? 'up' : 'down');
                             }
 
                             if (ticker.change !== newChange) ticker.change = newChange;
@@ -1392,23 +1014,25 @@
                 }
             }
 
-            // Все остальные методы класса остаются без изменений
-            playSound(direction) {
-                const sound = direction === 'up' ? this.upSound : this.downSound;
-                sound.currentTime = 0;
-                sound.play().catch(e => console.log('Не удалось воспроизвести звук:', e));
+            scheduleReconnect() {
+                if (this.state.wsReconnectAttempts < this.state.maxWsReconnectAttempts) {
+                    const delay = Math.min(1000 * Math.pow(2, this.state.wsReconnectAttempts), 30000);
+                    this.state.wsReconnectAttempts++;
+                    setTimeout(() => this.connectWebSocket(), delay);
+                } else {
+                    console.log("Превышено максимальное количество попыток переподключения WebSocket");
+                }
             }
 
-            updateSoundToggle() {
-                const soundToggle = document.getElementById('soundToggle');
-                soundToggle.innerHTML = this.state.soundEnabled
-                    ? '<i class="fas fa-volume-up"></i>'
-                    : '<i class="fas fa-volume-mute"></i>';
-
-                if (this.state.soundEnabled) {
-                    soundToggle.classList.add('pulse');
-                } else {
-                    soundToggle.classList.remove('pulse');
+            flashPrice(symbol, direction) {
+                const priceElement = document.querySelector(`.ticker-item[data-symbol="${symbol}"] .ticker-price`);
+                if (priceElement) {
+                    priceElement.classList.remove('price-flash-positive', 'price-flash-negative');
+                    void priceElement.offsetWidth;
+                    priceElement.classList.add(direction === 'up' ? 'price-flash-positive' : 'price-flash-negative');
+                    setTimeout(() => {
+                        priceElement.classList.remove('price-flash-positive', 'price-flash-negative');
+                    }, 1000);
                 }
             }
 
@@ -1419,18 +1043,41 @@
                 const defaultSymbols = this.state.marketType === 'futures' ? defaultFuturesSymbols : defaultSpotSymbols;
                 const allSymbolsMap = {};
 
+                // Используем предварительно загруженные данные для инициализации
+                if (this.initialTickersData) {
+                    this.initialTickersData.forEach(item => {
+                        const symbol = item.symbol;
+                        if (defaultSymbols.includes(symbol)) {
+                            allSymbolsMap[symbol] = {
+                                symbol,
+                                price: parseFloat(item.lastPrice),
+                                change: parseFloat(item.priceChangePercent),
+                                volume: parseFloat(this.state.marketType === 'futures' ? item.quoteVolume : item.volume) * parseFloat(item.lastPrice),
+                                custom: false,
+                                prevPrice: 0,
+                                priceFlash: null,
+                                marketType: this.state.marketType,
+                                flag: this.state.flags[`${symbol}:${this.state.marketType}`] || null
+                            };
+                        }
+                    });
+                }
+
+                // Заполняем недостающие значения по умолчанию
                 defaultSymbols.forEach(symbol => {
-                    allSymbolsMap[symbol] = {
-                        symbol,
-                        price: 0,
-                        change: 0,
-                        volume: 0,
-                        custom: false,
-                        prevPrice: 0,
-                        priceFlash: null,
-                        marketType: this.state.marketType,
-                        flag: this.state.flags[`${symbol}:${this.state.marketType}`] || null
-                    };
+                    if (!allSymbolsMap[symbol]) {
+                        allSymbolsMap[symbol] = {
+                            symbol,
+                            price: 0,
+                            change: 0,
+                            volume: 0,
+                            custom: false,
+                            prevPrice: 0,
+                            priceFlash: null,
+                            marketType: this.state.marketType,
+                            flag: this.state.flags[`${symbol}:${this.state.marketType}`] || null
+                        };
+                    }
                 });
 
                 this.state.customSymbols.forEach(symbol => {
@@ -1502,18 +1149,6 @@
                 }
 
                 this.renderTickerList();
-            }
-
-            flashPrice(symbol, direction) {
-                const priceElement = document.querySelector(`.ticker-item[data-symbol="${symbol}"] .ticker-price`);
-                if (priceElement) {
-                    priceElement.classList.remove('price-flash-positive', 'price-flash-negative');
-                    void priceElement.offsetWidth;
-                    priceElement.classList.add(direction === 'up' ? 'price-flash-positive' : 'price-flash-negative');
-                    setTimeout(() => {
-                        priceElement.classList.remove('price-flash-positive', 'price-flash-negative');
-                    }, 1000);
-                }
             }
 
             sortTickers(tickers) {
@@ -1786,9 +1421,7 @@
                 localStorage.setItem('favorites', JSON.stringify(this.state.favorites));
                 localStorage.setItem('customSymbols', JSON.stringify(this.state.customSymbols));
                 localStorage.setItem('flags', JSON.stringify(this.state.flags));
-                localStorage.setItem('chartSettings', JSON.stringify(this.state.chartSettings));
                 localStorage.setItem('marketType', this.state.marketType);
-                localStorage.setItem('soundEnabled', this.state.soundEnabled);
             }
 
             setupTickerItemEvents() {
@@ -2005,156 +1638,6 @@
                         this.saveState();
                         this.renderTickerList();
                     }
-                });
-
-                const chartSettingsModal = document.getElementById('chartSettingsModal');
-                const chartSettingsBtn = document.getElementById('chartSettingsBtn');
-                const indicatorsBtn = document.getElementById('indicatorsBtn');
-                const drawingToolsBtn = document.getElementById('drawingToolsBtn');
-                const fullscreenBtn = document.getElementById('fullscreenBtn');
-                const screenshotBtn = document.getElementById('screenshotBtn');
-                const saveSettingsBtn = document.getElementById('saveSettingsBtn');
-                const resetSettingsBtn = document.getElementById('resetSettingsBtn');
-                const closeSettingsModalBtns = document.querySelectorAll('#chartSettingsModal .close-modal');
-
-                this.loadChartSettingsToModal = () => {
-                    document.getElementById('chartStyle').value = this.state.chartSettings.chartStyle;
-                    document.getElementById('candleStyle').value = this.state.chartSettings.candleStyle;
-                    document.getElementById('upColor').value = this.state.chartSettings.upColor;
-                    document.getElementById('downColor').value = this.state.chartSettings.downColor;
-                    document.getElementById('wickColor').value = this.state.chartSettings.wickColor;
-                    document.getElementById('borderColor').value = this.state.chartSettings.borderColor;
-                    document.getElementById('backgroundColor').value = this.state.chartSettings.backgroundColor;
-                    document.getElementById('gridColor').value = this.state.chartSettings.gridColor;
-                    document.getElementById('priceScale').value = this.state.chartSettings.priceScale;
-                    document.getElementById('timeScale').value = this.state.chartSettings.timeScale;
-                    document.getElementById('rightMargin').value = this.state.chartSettings.rightMargin;
-                    document.getElementById('showPriceAxis').checked = this.state.chartSettings.showPriceAxis;
-                    document.getElementById('priceScaleMode').value = this.state.chartSettings.priceScaleMode;
-                    document.getElementById('showTradingPanel').checked = this.state.chartSettings.showTradingPanel;
-                    document.getElementById('showOrderLines').checked = this.state.chartSettings.showOrderLines;
-                    document.getElementById('showPositionLines').checked = this.state.chartSettings.showPositionLines;
-
-                    document.getElementById('upColorPreview').style.backgroundColor = this.state.chartSettings.upColor;
-                    document.getElementById('downColorPreview').style.backgroundColor = this.state.chartSettings.downColor;
-                    document.getElementById('wickColorPreview').style.backgroundColor = this.state.chartSettings.wickColor;
-                    document.getElementById('borderColorPreview').style.backgroundColor = this.state.chartSettings.borderColor;
-                    document.getElementById('backgroundColorPreview').style.backgroundColor = this.state.chartSettings.backgroundColor;
-                    document.getElementById('gridColorPreview').style.backgroundColor = this.state.chartSettings.gridColor;
-                };
-
-                document.querySelectorAll('.settings-tab').forEach(tab => {
-                    tab.addEventListener('click', () => {
-                        document.querySelectorAll('.settings-tab').forEach(t => t.classList.remove('active'));
-                        tab.classList.add('active');
-
-                        document.querySelectorAll('.settings-tab-content').forEach(content => {
-                            content.classList.remove('active');
-                            if (content.dataset.tab === tab.dataset.tab) {
-                                content.classList.add('active');
-                            }
-                        });
-                    });
-                });
-
-                document.querySelectorAll('input[type="color"]').forEach(input => {
-                    input.addEventListener('input', () => {
-                        const previewId = input.id + 'Preview';
-                        document.getElementById(previewId).style.backgroundColor = input.value;
-                    });
-                });
-
-                chartSettingsBtn.addEventListener('click', () => {
-                    this.loadChartSettingsToModal();
-                    chartSettingsModal.style.display = 'flex';
-                });
-
-                closeSettingsModalBtns.forEach(btn => {
-                    btn.addEventListener('click', () => {
-                        chartSettingsModal.style.display = 'none';
-                    });
-                });
-
-                saveSettingsBtn.addEventListener('click', () => {
-                    this.state.chartSettings = {
-                        chartStyle: document.getElementById('chartStyle').value,
-                        candleStyle: document.getElementById('candleStyle').value,
-                        upColor: document.getElementById('upColor').value,
-                        downColor: document.getElementById('downColor').value,
-                        wickColor: document.getElementById('wickColor').value,
-                        borderColor: document.getElementById('borderColor').value,
-                        backgroundColor: document.getElementById('backgroundColor').value,
-                        gridColor: document.getElementById('gridColor').value,
-                        priceScale: document.getElementById('priceScale').value,
-                        timeScale: document.getElementById('timeScale').value,
-                        rightMargin: document.getElementById('rightMargin').value,
-                        showPriceAxis: document.getElementById('showPriceAxis').checked,
-                        priceScaleMode: document.getElementById('priceScaleMode').value,
-                        showTradingPanel: document.getElementById('showTradingPanel').checked,
-                        showOrderLines: document.getElementById('showOrderLines').checked,
-                        showPositionLines: document.getElementById('showPositionLines').checked
-                    };
-
-                    this.saveState();
-                    this.initTradingView(this.state.currentSymbol);
-                    chartSettingsModal.style.display = 'none';
-                });
-
-                resetSettingsBtn.addEventListener('click', () => {
-                    if (confirm('Сбросить все настройки графика к значениям по умолчанию?')) {
-                        this.state.chartSettings = {
-                            chartStyle: '0',
-                            candleStyle: '0',
-                            upColor: '#26a69a',
-                            downColor: '#ef5350',
-                            wickColor: '#000000',
-                            borderColor: '#378658',
-                            backgroundColor: '#121212',
-                            gridColor: '#2d2d2d',
-                            priceScale: '1',
-                            timeScale: '0',
-                            rightMargin: '30',
-                            showPriceAxis: true,
-                            priceScaleMode: '0',
-                            showTradingPanel: true,
-                            showOrderLines: true,
-                            showPositionLines: true
-                        };
-
-                        this.saveState();
-                        this.initTradingView(this.state.currentSymbol);
-                        this.loadChartSettingsToModal();
-                    }
-                });
-
-                drawingToolsBtn.addEventListener('click', () => {
-                    if (this.state.tvWidget) {
-                        this.state.tvWidget.chart().executeActionById('drawingToolbarAction');
-                    }
-                });
-
-                indicatorsBtn.addEventListener('click', () => {
-                    if (this.state.tvWidget) {
-                        this.state.tvWidget.chart().executeActionById('insertIndicator');
-                    }
-                });
-
-                fullscreenBtn.addEventListener('click', () => {
-                    if (this.state.tvWidget) {
-                        this.state.tvWidget.chart().executeActionById('fullscreenMode');
-                    }
-                });
-
-                screenshotBtn.addEventListener('click', () => {
-                    if (this.state.tvWidget) {
-                        this.state.tvWidget.chart().executeActionById('takeScreenshot');
-                    }
-                });
-
-                document.getElementById('soundToggle').addEventListener('click', () => {
-                    this.state.soundEnabled = !this.state.soundEnabled;
-                    this.saveState();
-                    this.updateSoundToggle();
                 });
 
                 this.setupAutocomplete();
