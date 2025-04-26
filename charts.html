@@ -9,6 +9,8 @@
     <link rel="preconnect" href="https://api.binance.com">
     <link rel="preconnect" href="https://fapi.binance.com">
     <link rel="preconnect" href="https://stream.binance.com">
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -263,26 +265,6 @@
 
         .tv-lightweight-charts {
             border-radius: 0 !important;
-        }
-
-        @keyframes flash-positive {
-            0% { background-color: rgba(46, 125, 50, 0); }
-            50% { background-color: rgba(46, 125, 50, 0.3); }
-            100% { background-color: rgba(46, 125, 50, 0); }
-        }
-
-        @keyframes flash-negative {
-            0% { background-color: rgba(198, 40, 40, 0); }
-            50% { background-color: rgba(198, 40, 40, 0.3); }
-            100% { background-color: rgba(198, 40, 40, 0); }
-        }
-
-        .price-flash-positive {
-            animation: flash-positive 1s ease-out;
-        }
-
-        .price-flash-negative {
-            animation: flash-negative 1s ease-out;
         }
 
         .market-tag {
@@ -796,6 +778,7 @@
 
                 this.tickers = [];
                 this.allSymbolsCache = [];
+                this.chartLoading = false;
 
                 // Начинаем инициализацию данных
                 this.initializeData();
@@ -803,12 +786,7 @@
 
             async initializeData() {
                 try {
-                    // Загружаем данные параллельно
-                    const [symbolsData, tickersData] = await Promise.all([
-                        this.fetchAllSymbols(),
-                        this.fetchInitialTickers()
-                    ]);
-
+                    await this.fetchAllSymbols();
                     this.initializeTickers();
                     this.connectWebSocket();
 
@@ -827,25 +805,13 @@
                 }
             }
 
-            async fetchInitialTickers() {
-                const endpoint = this.state.marketType === 'futures' 
-                    ? 'https://fapi.binance.com/fapi/v1/ticker/24hr'
-                    : 'https://api.binance.com/api/v3/ticker/24hr';
-                
-                const response = await fetch(endpoint);
-                const data = await response.json();
-                
-                // Кэшируем начальные данные
-                this.initialTickersData = data;
-            }
-
             initTradingView(symbol) {
-                if (!TVScriptLoaded) {
-                    // Если TradingView еще не загружен, отложим инициализацию
-                    setTimeout(() => this.initTradingView(symbol), 100);
+                if (!TVScriptLoaded || this.chartLoading) {
                     return;
                 }
 
+                this.chartLoading = true;
+                
                 if (this.state.tvWidget) {
                     try {
                         this.state.tvWidget.remove();
@@ -858,14 +824,13 @@
                 const marketPrefix = 'BINANCE';
 
                 try {
-                    // Упрощенные настройки для более быстрой загрузки
                     this.state.tvWidget = new TradingView.widget({
                         "autosize": true,
                         "symbol": `${marketPrefix}:${formattedSymbol}`,
                         "interval": "1D",
                         "timezone": "Etc/UTC",
                         "theme": "dark",
-                        "style": "0", // Простые свечи по умолчанию
+                        "style": "0",
                         "locale": "ru",
                         "toolbar_bg": "#1E1E1E",
                         "enable_publishing": false,
@@ -876,29 +841,15 @@
                         "studies_overrides": {
                             "volume.volume.color.0": "#ef5350",
                             "volume.volume.color.1": "#26a69a"
-                        },
-                        "overrides": {
-                            "mainSeriesProperties.style": 0, // Свечи
-                            "mainSeriesProperties.candleStyle.upColor": "#26a69a",
-                            "mainSeriesProperties.candleStyle.downColor": "#ef5350",
-                            "mainSeriesProperties.candleStyle.borderUpColor": "#26a69a",
-                            "mainSeriesProperties.candleStyle.borderDownColor": "#ef5350",
-                            "mainSeriesProperties.candleStyle.wickUpColor": "#000000",
-                            "mainSeriesProperties.candleStyle.wickDownColor": "#000000",
-                            "paneProperties.background": "#121212",
-                            "paneProperties.vertGridProperties.color": "#2d2d2d",
-                            "paneProperties.horzGridProperties.color": "#2d2d2d",
-                            "scalesProperties.lineColor": "#2d2d2d",
-                            "scalesProperties.textColor": "#B0B0B0",
-                            "symbolWatermarkProperties.color": "rgba(0, 0, 0, 0)",
-                            "volume.volume.color.0": "#ef5350",
-                            "volume.volume.color.1": "#26a69a"
                         }
                     });
+                    
+                    this.chartLoading = false;
                 } catch (e) {
                     console.error("Ошибка при создании виджета TradingView:", e);
-                    // Повторная попытка через 2 секунды
-                    setTimeout(() => this.initTradingView(symbol), 2000);
+                    this.chartLoading = false;
+                    // Повторная попытка через 1 секунду
+                    setTimeout(() => this.initTradingView(symbol), 1000);
                 }
             }
 
@@ -997,7 +948,6 @@
                             if (ticker.price !== newPrice) {
                                 ticker.prevPrice = ticker.price;
                                 ticker.price = newPrice;
-                                this.flashPrice(ticker.symbol, newPrice > ticker.prevPrice ? 'up' : 'down');
                             }
 
                             if (ticker.change !== newChange) ticker.change = newChange;
@@ -1014,28 +964,6 @@
                 }
             }
 
-            scheduleReconnect() {
-                if (this.state.wsReconnectAttempts < this.state.maxWsReconnectAttempts) {
-                    const delay = Math.min(1000 * Math.pow(2, this.state.wsReconnectAttempts), 30000);
-                    this.state.wsReconnectAttempts++;
-                    setTimeout(() => this.connectWebSocket(), delay);
-                } else {
-                    console.log("Превышено максимальное количество попыток переподключения WebSocket");
-                }
-            }
-
-            flashPrice(symbol, direction) {
-                const priceElement = document.querySelector(`.ticker-item[data-symbol="${symbol}"] .ticker-price`);
-                if (priceElement) {
-                    priceElement.classList.remove('price-flash-positive', 'price-flash-negative');
-                    void priceElement.offsetWidth;
-                    priceElement.classList.add(direction === 'up' ? 'price-flash-positive' : 'price-flash-negative');
-                    setTimeout(() => {
-                        priceElement.classList.remove('price-flash-positive', 'price-flash-negative');
-                    }, 1000);
-                }
-            }
-
             initializeTickers() {
                 const defaultFuturesSymbols = ["BTCUSDT", "ETHUSDT", "BNBUSDT", "SOLUSDT", "XRPUSDT", "ADAUSDT"];
                 const defaultSpotSymbols = ["BTCUSDT", "ETHUSDT", "BNBUSDT", "SOLUSDT", "XRPUSDT", "ADAUSDT"];
@@ -1043,41 +971,17 @@
                 const defaultSymbols = this.state.marketType === 'futures' ? defaultFuturesSymbols : defaultSpotSymbols;
                 const allSymbolsMap = {};
 
-                // Используем предварительно загруженные данные для инициализации
-                if (this.initialTickersData) {
-                    this.initialTickersData.forEach(item => {
-                        const symbol = item.symbol;
-                        if (defaultSymbols.includes(symbol)) {
-                            allSymbolsMap[symbol] = {
-                                symbol,
-                                price: parseFloat(item.lastPrice),
-                                change: parseFloat(item.priceChangePercent),
-                                volume: parseFloat(this.state.marketType === 'futures' ? item.quoteVolume : item.volume) * parseFloat(item.lastPrice),
-                                custom: false,
-                                prevPrice: 0,
-                                priceFlash: null,
-                                marketType: this.state.marketType,
-                                flag: this.state.flags[`${symbol}:${this.state.marketType}`] || null
-                            };
-                        }
-                    });
-                }
-
-                // Заполняем недостающие значения по умолчанию
                 defaultSymbols.forEach(symbol => {
-                    if (!allSymbolsMap[symbol]) {
-                        allSymbolsMap[symbol] = {
-                            symbol,
-                            price: 0,
-                            change: 0,
-                            volume: 0,
-                            custom: false,
-                            prevPrice: 0,
-                            priceFlash: null,
-                            marketType: this.state.marketType,
-                            flag: this.state.flags[`${symbol}:${this.state.marketType}`] || null
-                        };
-                    }
+                    allSymbolsMap[symbol] = {
+                        symbol,
+                        price: 0,
+                        change: 0,
+                        volume: 0,
+                        custom: false,
+                        prevPrice: 0,
+                        marketType: this.state.marketType,
+                        flag: this.state.flags[`${symbol}:${this.state.marketType}`] || null
+                    };
                 });
 
                 this.state.customSymbols.forEach(symbol => {
@@ -1089,7 +993,6 @@
                             volume: 0,
                             custom: true,
                             prevPrice: 0,
-                            priceFlash: null,
                             marketType: this.state.marketType,
                             flag: this.state.flags[`${symbol}:${this.state.marketType}`] || null
                         };
@@ -1118,7 +1021,6 @@
                     volume: 0,
                     custom: isCustom,
                     prevPrice: 0,
-                    priceFlash: null,
                     marketType: this.state.marketType,
                     flag: null
                 };
@@ -1738,6 +1640,16 @@
             removeActive(items) {
                 for (let i = 0; i < items.length; i++) {
                     items[i].classList.remove("autocomplete-active");
+                }
+            }
+
+            scheduleReconnect() {
+                if (this.state.wsReconnectAttempts < this.state.maxWsReconnectAttempts) {
+                    const delay = Math.min(5000, 1000 * Math.pow(2, this.state.wsReconnectAttempts));
+                    this.state.wsReconnectAttempts++;
+                    setTimeout(() => this.connectWebSocket(), delay);
+                } else {
+                    console.log("Max reconnection attempts reached. Please refresh the page.");
                 }
             }
         }
