@@ -1102,8 +1102,6 @@
         let currentMarketType = 'futures';
         let newPairs = [];
         let apiManager;
-        let priceUpdateInterval = null;
-        let currentSymbol = null;
         let currentPage = 1;
         const pageSize = 50;
         let loadingMore = false;
@@ -1118,7 +1116,6 @@
                     retries: 0,
                     error: null
                 };
-                this.wsConnections = new Map();
             }
 
             async init() {
@@ -1221,38 +1218,6 @@
                 }
             }
 
-            createWebSocket(symbol, callback) {
-                const wsUrl = `wss://stream.binance.com:9443/ws/${symbol.toLowerCase()}@trade`;
-                const ws = new WebSocket(wsUrl);
-
-                const heartbeat = () => {
-                    clearTimeout(this.pingTimeout);
-                    this.pingTimeout = setTimeout(() => ws.close(), 30000);
-                };
-
-                ws.onopen = () => {
-                    heartbeat();
-                    this.wsConnections.set(symbol, ws);
-                    console.log(`WebSocket connected for ${symbol}`);
-                };
-
-                ws.onmessage = (msg) => {
-                    heartbeat();
-                    callback(JSON.parse(msg.data));
-                };
-
-                ws.onclose = () => {
-                    clearTimeout(this.pingTimeout);
-                    console.log(`WebSocket disconnected for ${symbol}, reconnecting...`);
-                    setTimeout(() => this.createWebSocket(symbol, callback), 1000);
-                };
-
-                ws.onerror = (error) => {
-                    console.error('WebSocket error:', error);
-                    ws.close();
-                };
-            }
-
             async getCurrentPrice(symbol, marketType) {
                 try {
                     const endpoint = marketType === 'futures' 
@@ -1293,51 +1258,6 @@
             } catch (error) {
                 console.error('Ошибка отправки сообщения:', error);
                 return false;
-            }
-        }
-
-        function startPriceUpdates(symbol, marketType) {
-            stopPriceUpdates();
-            currentSymbol = symbol;
-            
-            const updatePrice = async () => {
-                try {
-                    const price = await apiManager.getCurrentPrice(symbol, marketType);
-                    if (price !== null) {
-                        const currentPriceValue = document.getElementById('currentPriceValue');
-                        const currentPriceContainer = document.getElementById('currentPriceContainer');
-                        
-                        if (currentPriceValue && currentPriceContainer) {
-                            currentPriceValue.textContent = price.toFixed(4);
-                            currentPriceContainer.classList.remove('hidden');
-                        }
-                    } else {
-                        const currentPriceContainer = document.getElementById('currentPriceContainer');
-                        if (currentPriceContainer) {
-                            currentPriceContainer.classList.add('hidden');
-                        }
-                    }
-                } catch (error) {
-                    console.error('Price update error:', error);
-                    const currentPriceContainer = document.getElementById('currentPriceContainer');
-                    if (currentPriceContainer) {
-                        currentPriceContainer.classList.add('hidden');
-                    }
-                }
-            };
-
-            updatePrice();
-            priceUpdateInterval = setInterval(updatePrice, 5000);
-        }
-
-        function stopPriceUpdates() {
-            if (priceUpdateInterval) {
-                clearInterval(priceUpdateInterval);
-                priceUpdateInterval = null;
-            }
-            const currentPriceContainer = document.getElementById('currentPriceContainer');
-            if (currentPriceContainer) {
-                currentPriceContainer.classList.add('hidden');
             }
         }
 
@@ -1548,9 +1468,6 @@
                 updateCoinSelect();
                 updateCoinsCount();
                 
-                // Подписываемся на WebSocket для обновления цен
-                subscribeToVisiblePairs();
-                
                 const loadingIndicator = document.getElementById('loadingIndicator');
                 if (loadingIndicator) loadingIndicator.classList.remove('active');
             } catch (error) {
@@ -1571,41 +1488,6 @@
                 
                 apiManager._handleConnectionError(error);
             }
-        }
-        
-        function subscribeToVisiblePairs() {
-            if (!apiManager) return;
-            
-            // Очищаем предыдущие соединения для невидимых пар
-            const visibleSymbols = filteredMarketData
-                .slice((currentPage - 1) * pageSize, currentPage * pageSize)
-                .map(coin => coin.symbol);
-            
-            apiManager.wsConnections.forEach((ws, symbol) => {
-                if (!visibleSymbols.includes(symbol)) {
-                    ws.close();
-                    apiManager.wsConnections.delete(symbol);
-                }
-            });
-
-            // Подписываемся на новые видимые пары
-            visibleSymbols.forEach(symbol => {
-                if (!apiManager.wsConnections.has(symbol)) {
-                    apiManager.createWebSocket(symbol, (data) => {
-                        const row = document.querySelector(`tr[data-symbol="${symbol}"]`);
-                        if (!row) return;
-                        
-                        const price = parseFloat(data.p);
-                        const priceCell = row.querySelector('.price-cell');
-                        if (priceCell) {
-                            priceCell.textContent = price.toLocaleString('en-US', { 
-                                minimumFractionDigits: 4, 
-                                maximumFractionDigits: 8 
-                            });
-                        }
-                    });
-                }
-            });
         }
         
         function setupInfiniteScroll() {
@@ -1825,13 +1707,6 @@
             valueInput.value = currentPrice.toFixed(4);
             symbolInput.classList.add('hidden');
             
-            startPriceUpdates(symbol, marketType);
-            
-            const alertForm = document.getElementById('alertForm');
-            if (alertForm) {
-                alertForm.scrollIntoView({ behavior: 'smooth' });
-            }
-            
             // Скрываем ошибки валидации при выборе из списка
             hideValidationError('coinSearch');
             hideValidationError('value');
@@ -2030,7 +1905,6 @@
                 : [...allSpot].slice(0, pageSize);
             
             filterMarketData();
-            subscribeToVisiblePairs();
         }
         
         function editAlert(alertId) {
@@ -2113,7 +1987,7 @@
             editFormContent.appendChild(formClone);
             editModal.classList.add('active');
             
-            // Устанавливаем тип рынка и подключаем обновление цены
+            // Устанавливаем тип рынка
             const marketType = getMarketTypeBySymbol(alert.symbol);
             const badge = marketType === 'spot' ? 
                 '<span class="spot-badge">SPOT</span>' : 
@@ -2123,8 +1997,6 @@
             if (hint) {
                 hint.innerHTML = badge;
             }
-            
-            startPriceUpdates(alert.symbol, marketType);
         }
         
         function handleEditSubmit(alertId) {
@@ -2201,8 +2073,6 @@
             
             if (editModal) editModal.classList.remove('active');
             if (editFormContent) editFormContent.innerHTML = '';
-            
-            stopPriceUpdates();
         }
         
         // New functions for bulk alerts
@@ -2704,16 +2574,11 @@
                                 '<span class="spot-badge">SPOT</span>' : 
                                 '<span class="futures-badge">FUTURES</span>';
                             if (hint) hint.innerHTML = badge;
-                            
-                            // Запускаем обновление цены
-                            startPriceUpdates(symbol, marketType);
                         } else {
                             if (hint) hint.innerHTML = '';
-                            stopPriceUpdates();
                         }
                     } else {
                         if (hint) hint.innerHTML = '';
-                        stopPriceUpdates();
                     }
                 });
             }
@@ -2734,8 +2599,6 @@
                         '<span class="futures-badge">FUTURES</span>';
                     const hint = document.getElementById('marketTypeHint');
                     if (hint) hint.innerHTML = badge;
-                    
-                    startPriceUpdates(symbol, marketType);
                     
                     // Скрываем ошибку валидации при выборе из списка
                     hideValidationError('coinSearch');
@@ -2894,8 +2757,6 @@
                     
                     const submitBtnText = document.getElementById('submitBtnText');
                     if (submitBtnText) submitBtnText.textContent = 'Создать алерт';
-                    
-                    stopPriceUpdates();
                 });
             }
             
