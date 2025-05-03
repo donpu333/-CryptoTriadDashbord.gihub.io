@@ -5,35 +5,51 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Crypto Tools</title>
     <style>
-        /* Все предыдущие стили остаются без изменений */
         body {
             margin: 0;
             padding: 0;
             font-family: 'JetBrains Mono', monospace;
-            transition: margin-top 0.3s ease;
         }
         
         .nav-container {
             background: #1E1E1E;
-            height: 25px;
+            height: 40px; /* Увеличил высоту */
             width: 100%;
             position: fixed;
             top: 0;
             z-index: 100;
-            transition: height 0.3s ease;
-            overflow: hidden;
             box-shadow: 0 2px 5px rgba(0,0,0,0.2);
             display: flex;
-            justify-content: flex-start;
+            align-items: center; /* Выравниваем элементы по центру */
+            padding: 0 20px; /* Добавляем отступы по бокам */
         }
         
-        /* ... остальные стили ... */
-
+        .nav-content {
+            display: flex;
+            gap: 20px; /* Расстояние между ссылками */
+        }
+        
+        .nav-link {
+            color: white;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        
+        .content-wrapper {
+            padding-top: 60px; /* Важно: отступ для фиксированного меню */
+            height: calc(100vh - 60px); /* Занимаем всю высоту минус меню */
+            width: 100%;
+        }
+        
+        #contentFrame {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
     </style>
 </head>
 <body>
     <nav class="nav-container">
-        <div class="menu-hint">Меню</div>
         <div class="nav-content">
             <a class="nav-link" onclick="loadPage('calculator')">Калькулятор</a>
             <a class="nav-link" onclick="loadPage('charts')">Графики</a>
