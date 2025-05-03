@@ -5,46 +5,60 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Crypto Tools</title>
     <style>
-        body {
+        * {
             margin: 0;
             padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
             font-family: 'JetBrains Mono', monospace;
+            height: 100vh; /* Занимает всю высоту экрана */
+            overflow: hidden; /* Убирает прокрутку тела */
         }
         
         .nav-container {
             background: #1E1E1E;
-            height: 40px; /* Увеличил высоту */
+            height: 50px; /* Фиксированная высота меню */
             width: 100%;
             position: fixed;
             top: 0;
             z-index: 100;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
             display: flex;
-            align-items: center; /* Выравниваем элементы по центру */
-            padding: 0 20px; /* Добавляем отступы по бокам */
+            align-items: center;
+            padding: 0 20px;
         }
         
         .nav-content {
             display: flex;
-            gap: 20px; /* Расстояние между ссылками */
+            gap: 20px;
         }
         
         .nav-link {
             color: white;
             text-decoration: none;
             cursor: pointer;
+            padding: 5px 10px;
+            border-radius: 4px;
+            transition: background 0.2s;
+        }
+        
+        .nav-link:hover {
+            background: #333;
         }
         
         .content-wrapper {
-            padding-top: 60px; /* Важно: отступ для фиксированного меню */
-            height: calc(100vh - 60px); /* Занимаем всю высоту минус меню */
-            width: 100%;
+            padding-top: 50px; /* Отступ под меню */
+            height: 100vh; /* Занимает всю высоту */
+            width: 100vw; /* Занимает всю ширину */
         }
         
         #contentFrame {
             width: 100%;
             height: 100%;
             border: none;
+            background: #f5f5f5;
         }
     </style>
 </head>
